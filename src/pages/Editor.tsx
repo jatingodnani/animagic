@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -13,8 +14,6 @@ import { ArrowLeft, Presentation, Sparkles, Wand2, Film, Video } from 'lucide-re
 import { Link } from 'react-router-dom';
 import { previewAnimation } from '@/utils/frameAnimationUtils';
 import { Button } from "@/components/ui/button";
-import { motion } from 'framer-motion';
-import ParallaxSection from '@/components/animation/ParallaxSection';
 
 const Editor = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -128,120 +127,49 @@ const Editor = () => {
     };
   }, []);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      transition: { 
-        type: "spring", 
-        stiffness: 100,
-        damping: 10
-      }
-    }
-  };
-
   return (
-    <div className="min-h-screen flex flex-col editor-gradient">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       
       <main className="flex-grow py-8 px-4">
         <div className="container max-w-7xl mx-auto">
-          <motion.div 
-            className="flex items-center justify-between mb-6"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <Link to="/" className="text-animation-gray-500 hover:text-animation-purple transition-colors">
+              <Link to="/" className="text-gray-500 hover:text-animation-purple transition-colors">
                 <ArrowLeft className="h-4 w-4" />
               </Link>
-              <motion.h1 
-                className="text-2xl font-semibold"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
+              <h1 className="text-2xl font-semibold">
                 Video Animation Editor
-              </motion.h1>
+              </h1>
             </div>
             
             <Link to="/presentation">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Presentation className="h-4 w-4" />
-                  Presentation Mode
-                </Button>
-              </motion.div>
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Presentation className="h-4 w-4" />
+                Presentation Mode
+              </Button>
             </Link>
-          </motion.div>
+          </div>
           
           {!videoFile ? (
-            <ParallaxSection className="max-w-2xl mx-auto my-12" staggerChildren>
+            <div className="max-w-2xl mx-auto my-12">
               <div className="mb-8 text-center">
-                <motion.h2 
-                  className="text-2xl font-semibold mb-3"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
+                <h2 className="text-2xl font-semibold mb-3">
                   Get Started
-                </motion.h2>
-                <motion.p 
-                  className="text-animation-gray-500"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
+                </h2>
+                <p className="text-gray-500">
                   Upload a video to begin creating your animation.
-                </motion.p>
+                </p>
               </div>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="relative"
-              >
-                <motion.div 
-                  className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl blur-md opacity-30"
-                  animate={{ 
-                    scale: [1, 1.02, 1],
-                    opacity: [0.3, 0.4, 0.3]
-                  }}
-                  transition={{ 
-                    duration: 3, 
-                    repeat: Infinity,
-                    repeatType: "reverse"
-                  }}
-                />
-                <div className="relative bg-white rounded-lg p-1">
+              <div className="relative">
+                <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
                   <VideoUploader onVideoLoaded={handleVideoLoaded} />
                 </div>
-              </motion.div>
-            </ParallaxSection>
+              </div>
+            </div>
           ) : (
-            <motion.div 
-              className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              <motion.div className="lg:col-span-2 space-y-6" variants={itemVariants}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
                 <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                   <Tabs defaultValue="preview" className="space-y-4">
                     <TabsList className="grid grid-cols-2">
@@ -257,22 +185,7 @@ const Editor = () => {
                     
                     <TabsContent value="preview" className="space-y-4">
                       {frames.length > 0 && selectedFrame < frames.length ? (
-                        <motion.div 
-                          className="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center relative"
-                          whileHover={{ scale: 1.01 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <motion.div 
-                            className="absolute inset-0 bg-gradient-to-tr from-animation-purple/10 to-transparent"
-                            animate={{ 
-                              backgroundPosition: ['0% 0%', '100% 100%'],
-                            }}
-                            transition={{ 
-                              duration: 15, 
-                              repeat: Infinity,
-                              repeatType: "reverse"
-                            }}
-                          />
+                        <div className="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center relative">
                           <canvas
                             ref={canvasRef}
                             className="max-h-full max-w-full relative z-10"
@@ -296,10 +209,10 @@ const Editor = () => {
                               }}
                             />
                           )}
-                        </motion.div>
+                        </div>
                       ) : (
-                        <div className="aspect-video bg-animation-gray-100 rounded-lg flex items-center justify-center">
-                          <p className="text-animation-gray-500">
+                        <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+                          <p className="text-gray-500">
                             {frames.length === 0 
                               ? "Extract frames to preview them here" 
                               : "No frame selected"}
@@ -307,41 +220,15 @@ const Editor = () => {
                         </div>
                       )}
                       
-                      <motion.div 
-                        className="text-sm text-animation-gray-500"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                      >
+                      <div className="text-sm text-gray-500">
                         {frames.length > 0 && selectedFrame < frames.length ? (
                           <p>
-                            <motion.span
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ delay: 0.7 }}
-                            >
-                              Viewing frame
-                            </motion.span>{" "}
-                            <motion.span
-                              className="text-animation-purple font-medium"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ delay: 0.9 }}
-                            >
-                              {selectedFrame + 1}
-                            </motion.span>{" "}
-                            <motion.span
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ delay: 1.1 }}
-                            >
-                              of {frames.length}
-                            </motion.span>
+                            Viewing frame {selectedFrame + 1} of {frames.length}
                           </p>
                         ) : (
                           <p>No frames available</p>
                         )}
-                      </motion.div>
+                      </div>
                     </TabsContent>
                     
                     <TabsContent value="original">
@@ -354,59 +241,49 @@ const Editor = () => {
                           />
                         </div>
                       ) : (
-                        <div className="aspect-video bg-animation-gray-100 rounded-lg flex items-center justify-center">
-                          <p className="text-animation-gray-500">No video loaded</p>
+                        <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+                          <p className="text-gray-500">No video loaded</p>
                         </div>
                       )}
                     </TabsContent>
                   </Tabs>
                 </div>
                 
-                <motion.div variants={itemVariants}>
+                <div>
                   <Timeline 
                     frames={frames} 
                     onFrameSelect={handleFrameSelect} 
                   />
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
               
-              <motion.div className="space-y-6" variants={itemVariants}>
-                <ParallaxSection direction="right" speed={0.2}>
+              <div className="space-y-6">
+                <div>
                   <FrameExtractor 
                     videoUrl={videoUrl} 
                     onFramesExtracted={handleFramesExtracted} 
                   />
-                </ParallaxSection>
+                </div>
                 
                 {frames.length > 0 && (
-                  <ParallaxSection direction="left" speed={0.2}>
-                    <motion.div
-                      whileHover={{ scale: 1.01 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <AnimationTools 
-                        selectedFrame={selectedFrame}
-                        totalFrames={frames.length}
-                        onApplyEffect={handleApplyEffect}
-                        onPreviewEffect={handlePreviewEffect}
-                      />
-                    </motion.div>
-                  </ParallaxSection>
+                  <div>
+                    <AnimationTools 
+                      selectedFrame={selectedFrame}
+                      totalFrames={frames.length}
+                      onApplyEffect={handleApplyEffect}
+                      onPreviewEffect={handlePreviewEffect}
+                    />
+                  </div>
                 )}
                 
-                <ParallaxSection direction="right" speed={0.2}>
-                  <motion.div
-                    whileHover={{ scale: 1.01 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <VideoExporter 
-                      frames={frames} 
-                      frameRate={frameRate} 
-                    />
-                  </motion.div>
-                </ParallaxSection>
-              </motion.div>
-            </motion.div>
+                <div>
+                  <VideoExporter 
+                    frames={frames} 
+                    frameRate={frameRate} 
+                  />
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </main>
