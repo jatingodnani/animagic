@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Tabs, 
@@ -70,7 +71,7 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
   }, [onPreviewEffect]);
   
   const handleEffectTypeChange = (type: string) => {
-    let newDirection = effect.direction;
+    let newDirection: AnimationEffect['direction'];
     
     switch (type) {
       case 'fade':
@@ -85,12 +86,14 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
       case 'move':
         newDirection = 'right';
         break;
+      default:
+        newDirection = 'in';
     }
     
     const newEffect = {
       type: type as AnimationEffect['type'],
       intensity: effect.intensity,
-      direction: newDirection as AnimationEffect['direction']
+      direction: newDirection
     };
     
     setEffect(newEffect);
@@ -101,36 +104,35 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
   };
   
   const handleDirectionChange = (direction: string) => {
-    setEffect({
+    const newEffect = {
       ...effect,
       direction: direction as AnimationEffect['direction']
-    });
+    };
+    
+    setEffect(newEffect);
     
     if (isPreviewing) {
-      onPreviewEffect({
-        ...effect,
-        direction: direction as AnimationEffect['direction']
-      });
+      onPreviewEffect(newEffect);
     }
   };
   
   const handleIntensityChange = (value: number[]) => {
-    setEffect({
+    const newEffect = {
       ...effect,
       intensity: value[0]
-    });
+    };
+    
+    setEffect(newEffect);
     
     if (isPreviewing) {
-      onPreviewEffect({
-        ...effect,
-        intensity: value[0]
-      });
+      onPreviewEffect(newEffect);
     }
   };
   
   const handleApply = () => {
     onApplyEffect(effect, frameRange);
     setIsPreviewing(false);
+    onPreviewEffect(null);
   };
   
   const handlePreviewToggle = () => {

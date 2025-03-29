@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import VideoUploader from '@/components/VideoUploader';
@@ -97,7 +97,7 @@ const Editor = () => {
                     <TabsContent value="preview" className="space-y-4">
                       {frames.length > 0 && selectedFrame < frames.length ? (
                         <div className="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
-                          <div className={`relative ${getPreviewClass(previewEffect)}`} style={getPreviewStyle(previewEffect)}>
+                          <div className={getPreviewClass(previewEffect)} style={getPreviewStyle(previewEffect)}>
                             <img 
                               src={frames[selectedFrame]} 
                               alt={`Frame ${selectedFrame + 1}`}
@@ -201,19 +201,18 @@ const getPreviewClass = (effect: AnimationEffect | null): string => {
         : "animate-scale-out";
       
     case "rotate":
-      // Apply specific rotation animation class
-      return "transition-all transform";
+      return "transition-transform";
       
     case "move":
       switch (effect.direction) {
         case "left":
-          return "animate-[slide-in-right_1s_ease-out_infinite_reverse]";
+          return "animate-slide-in-right animate-reverse";
         case "right":
-          return "animate-[slide-in-right_1s_ease-out_infinite]";
+          return "animate-slide-in-right";
         case "up":
-          return "translate-y-full animate-[fade-in_1s_ease-out_infinite_reverse]";
+          return "animate-fade-in animate-reverse";
         case "down":
-          return "translate-y-[-100%] animate-[fade-in_1s_ease-out_infinite]";
+          return "animate-fade-in";
         default:
           return "";
       }
@@ -227,20 +226,33 @@ const getPreviewClass = (effect: AnimationEffect | null): string => {
 const getPreviewStyle = (effect: AnimationEffect | null): React.CSSProperties => {
   if (!effect) return {};
   
-  const intensityFactor = effect.intensity / 50; // Normalize intensity
+  const intensityFactor = effect.intensity / 100; // Normalize intensity (0-1)
   
-  const style: React.CSSProperties = {
-    animationDuration: `${2 / intensityFactor}s`,
-  };
+  const style: React.CSSProperties = {};
   
-  // Add specific rotation styles for the rotate effect
-  if (effect.type === "rotate") {
-    const rotationDegrees = 360 * intensityFactor;
-    const rotationDirection = effect.direction === "clockwise" ? 1 : -1;
-    
-    style.animation = "none"; // Disable default animation
-    style.transform = `rotate(${rotationDegrees * rotationDirection}deg)`;
-    style.transition = `transform ${2000 / effect.intensity}ms linear infinite`;
+  switch (effect.type) {
+    case "fade":
+      style.animationDuration = `${1.5 / intensityFactor}s`;
+      break;
+      
+    case "zoom":
+      style.animationDuration = `${1.5 / intensityFactor}s`;
+      break;
+      
+    case "rotate":
+      const rotationDeg = effect.direction === "clockwise" ? 360 : -360;
+      style.transform = `rotate(${rotationDeg * intensityFactor}deg)`;
+      style.transition = `transform ${1.5 / intensityFactor}s linear`;
+      style.animationIterationCount = "infinite";
+      break;
+      
+    case "move":
+      style.animationDuration = `${1.5 / intensityFactor}s`;
+      style.animationIterationCount = "infinite";
+      break;
+      
+    default:
+      break;
   }
   
   return style;
