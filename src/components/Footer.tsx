@@ -79,6 +79,9 @@ const Footer = () => {
           <p className="text-sm text-animation-gray-500 text-center">
             © {new Date().getFullYear()} AniMagic. All rights reserved.
           </p>
+          <p className="text-sm text-animation-gray-500 text-center mt-2">
+            Made with ❤️ by Lovable and Jatin
+          </p>
         </div>
       </div>
     </footer>
