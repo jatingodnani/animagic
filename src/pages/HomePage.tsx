@@ -1,8 +1,8 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Upload, Sparkles, Palette, Film, Download, Wand2 } from 'lucide-react';
+import { ArrowRight, Upload, Sparkles, Palette, Film, Download, Wand2, Play, Pause, RotateCw, ZoomIn, MoveHorizontal } from 'lucide-react';
 import AnimatedBackground from '@/components/animation/AnimatedBackground';
 import AnimatedText from '@/components/animation/AnimatedText';
 import Perspective3DCard from '@/components/animation/Perspective3DCard';
@@ -30,6 +30,18 @@ const HomePage = () => {
     "Add special effects",
     "Share your creations",
     "Unleash your creativity"
+  ];
+
+  // Interactive animation showcase state
+  const [activeEffect, setActiveEffect] = useState<string>('fade');
+  const [isPlaying, setIsPlaying] = useState(true);
+  
+  // Effect showcase options
+  const effects = [
+    { id: 'fade', name: 'Fade Effect', icon: <Sparkles className="h-5 w-5" /> },
+    { id: 'zoom', name: 'Zoom Effect', icon: <ZoomIn className="h-5 w-5" /> },
+    { id: 'rotate', name: 'Rotation Effect', icon: <RotateCw className="h-5 w-5" /> },
+    { id: 'move', name: 'Movement Effect', icon: <MoveHorizontal className="h-5 w-5" /> },
   ];
 
   return (
@@ -81,6 +93,89 @@ const HomePage = () => {
                   <Film className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* New Interactive Animation Demo Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-4">See Animation Magic in Action</h2>
+            <p className="text-animation-gray-600 max-w-2xl mx-auto">
+              Try different animation effects interactively and see how they transform content in real-time
+            </p>
+          </div>
+          
+          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 bg-animation-gray-100 rounded-xl overflow-hidden shadow-md">
+              <div className="relative aspect-video overflow-hidden">
+                {/* Animation Preview Area */}
+                <div className={`absolute inset-0 flex items-center justify-center transition-all duration-700 
+                  ${activeEffect === 'fade' ? 'animate-pulse opacity-0 animate-fade-in-out' : ''}
+                  ${activeEffect === 'zoom' ? 'animate-pulse scale-[0.8] animate-zoom-in-out' : ''}
+                  ${activeEffect === 'rotate' ? 'animate-pulse animate-rotate-slow' : ''}
+                  ${activeEffect === 'move' ? 'animate-pulse animate-move-horizontal' : ''}
+                `}>
+                  <img 
+                    src="https://images.unsplash.com/photo-1569017388730-020b5dd05082?auto=format&fit=crop&q=80&w=800"
+                    alt="Animation Demo" 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <Button 
+                      size="lg" 
+                      variant="outline"
+                      className="rounded-full w-16 h-16 bg-white/20 backdrop-blur-sm border-white/40 hover:bg-white/30"
+                      onClick={() => setIsPlaying(!isPlaying)}
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-8 w-8 text-white" />
+                      ) : (
+                        <Play className="h-8 w-8 text-white" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-4 flex justify-center">
+                <p className="text-animation-gray-600 font-medium">
+                  Currently showing: <span className="text-animation-purple">{effects.find(e => e.id === activeEffect)?.name}</span>
+                </p>
+              </div>
+            </div>
+            
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                <h3 className="font-semibold mb-4 text-lg">Choose an Effect</h3>
+                <div className="space-y-2">
+                  {effects.map((effect) => (
+                    <Button 
+                      key={effect.id}
+                      variant={activeEffect === effect.id ? "default" : "outline"}
+                      className={`w-full justify-start text-left ${activeEffect === effect.id ? 'bg-animation-purple hover:bg-animation-purple/90' : ''}`}
+                      onClick={() => setActiveEffect(effect.id)}
+                    >
+                      <div className="mr-2">{effect.icon}</div>
+                      {effect.name}
+                    </Button>
+                  ))}
+                </div>
+                
+                <div className="mt-6 pt-4 border-t border-gray-100">
+                  <p className="text-sm text-animation-gray-500 mb-4">
+                    These are just a few examples. AniMagic offers dozens of customizable effects.
+                  </p>
+                  <Link to="/editor">
+                    <Button className="w-full bg-animation-purple hover:bg-animation-purple/90">
+                      Try All Effects
+                      <Wand2 className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -299,6 +394,44 @@ const HomePage = () => {
       </section>
       
       <Footer />
+      
+      <style jsx>{`
+        @keyframes fade-in-out {
+          0%, 100% { opacity: 0; }
+          50% { opacity: 1; }
+        }
+        
+        @keyframes zoom-in-out {
+          0%, 100% { transform: scale(0.8); }
+          50% { transform: scale(1.2); }
+        }
+        
+        @keyframes rotate-slow {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes move-horizontal {
+          0%, 100% { transform: translateX(-30px); }
+          50% { transform: translateX(30px); }
+        }
+        
+        .animate-fade-in-out {
+          animation: fade-in-out 3s infinite;
+        }
+        
+        .animate-zoom-in-out {
+          animation: zoom-in-out 3s infinite;
+        }
+        
+        .animate-rotate-slow {
+          animation: rotate-slow 3s infinite linear;
+        }
+        
+        .animate-move-horizontal {
+          animation: move-horizontal 3s infinite ease-in-out;
+        }
+      `}</style>
     </div>
   );
 };
