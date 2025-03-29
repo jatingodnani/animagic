@@ -1,52 +1,22 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Download, Settings, Film, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
-import { Download, Film, Settings, Info, AlertTriangle, Music } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert";
+import { ExportSettings, VideoExporterProps } from '@/types/video';
+import { 
+  getDefaultExportSettings, 
+  getTotalFramesForAnimation, 
+  getQualitySettings 
+} from '@/utils/videoExportUtils';
 
-interface VideoExporterProps {
-  frames: string[];
-  frameRate?: number;
-}
-
-interface ExportSettings {
-  quality: string;
-  format: string;
-  frameRate: number;
-  duration: string;
-  resolution: { width: number; height: number };
-  customWidth: number;
-  customHeight: number;
-  useCustomResolution: boolean;
-  includeWatermark: boolean;
-  compressionLevel: number;
-  includeAudio: boolean;
-  audioFile: File | null;
-  audioVolume: number;
-}
+// Import sub-components
+import BasicSettings from './video-export/BasicSettings';
+import AdvancedSettings from './video-export/AdvancedSettings';
+import AudioSettings from './video-export/AudioSettings';
+import ExportProgress from './video-export/ExportProgress';
+import ExportSummary from './video-export/ExportSummary';
 
 const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 }) => {
   const [isExporting, setIsExporting] = useState(false);
@@ -54,23 +24,8 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [isMacOS, setIsMacOS] = useState(false);
   const [hasWebCodecSupport, setHasWebCodecSupport] = useState(true);
-  const [settings, setSettings] = useState<ExportSettings>({
-    quality: "medium",
-    format: "mp4",
-    frameRate: frameRate,
-    duration: "5",
-    resolution: { width: 1280, height: 720 },
-    customWidth: 1280,
-    customHeight: 1280,
-    useCustomResolution: false,
-    includeWatermark: false,
-    compressionLevel: 50,
-    includeAudio: false,
-    audioFile: null,
-    audioVolume: 80
-  });
+  const [settings, setSettings] = useState<ExportSettings>(getDefaultExportSettings(frameRate));
   
-  const audioInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
   useEffect(() => {
@@ -88,45 +43,6 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
     }
   }, []);
   
-  const getTotalFramesForAnimation = () => {
-    const duration = parseFloat(settings.duration);
-    if (isNaN(duration) || duration <= 0) return frameRate * 5;
-    return Math.round(duration * settings.frameRate);
-  };
-  
-  const getQualitySettings = () => {
-    if (settings.useCustomResolution) {
-      return {
-        width: settings.customWidth,
-        height: settings.customHeight,
-        bitrate: getQualityBitrate(settings.quality)
-      };
-    }
-    
-    switch (settings.quality) {
-      case "low":
-        return { width: 640, height: 360, bitrate: 1000000 };
-      case "medium":
-        return { width: 1280, height: 720, bitrate: 2500000 };
-      case "high":
-        return { width: 1920, height: 1080, bitrate: 5000000 };
-      case "ultra":
-        return { width: 3840, height: 2160, bitrate: 12000000 };
-      default:
-        return { width: 1280, height: 720, bitrate: 2500000 };
-    }
-  };
-  
-  const getQualityBitrate = (quality: string) => {
-    switch (quality) {
-      case "low": return 1000000;
-      case "medium": return 2500000;
-      case "high": return 5000000;
-      case "ultra": return 12000000;
-      default: return 2500000;
-    }
-  };
-  
   const handleSettingChange = (key: keyof ExportSettings, value: any) => {
     setSettings(prev => ({
       ...prev,
@@ -134,63 +50,20 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
     }));
   };
   
-  const getAvailableFormats = () => {
-    if (!hasWebCodecSupport) {
-      return ["gif"];
-    }
-    
-    if (isMacOS) {
-      return ["mp4", "webm", "gif"];
-    }
-    
-    return ["mp4", "webm", "gif", "mov"];
-  };
-
-  const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    if (file) {
-      // Check if file is an audio file
-      if (!file.type.startsWith('audio/')) {
-        toast({
-          title: "Invalid file type",
-          description: "Please select an audio file (.mp3, .wav, etc.)",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // File size check (10MB limit)
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      if (file.size > maxSize) {
-        toast({
-          title: "File too large",
-          description: "Audio file must be less than 10MB",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      handleSettingChange('audioFile', file);
-      handleSettingChange('includeAudio', true);
-      
-      toast({
-        title: "Audio added",
-        description: `${file.name} will be included in your export`,
-      });
-    }
-  };
+  useEffect(() => {
+    getTotalFramesForAnimation(settings);
+  }, [settings.frameRate, settings.duration]);
   
-  const removeAudio = () => {
-    handleSettingChange('audioFile', null);
-    handleSettingChange('includeAudio', false);
-    if (audioInputRef.current) {
-      audioInputRef.current.value = '';
+  useEffect(() => {
+    if (!settings.useCustomResolution) {
+      const qualitySettings = getQualitySettings(settings);
+      setSettings(prev => ({
+        ...prev,
+        customWidth: qualitySettings.width,
+        customHeight: qualitySettings.height
+      }));
     }
-    toast({
-      title: "Audio removed",
-      description: "Your export will not include audio",
-    });
-  };
+  }, [settings.quality, settings.useCustomResolution]);
   
   const exportVideo = async () => {
     if (frames.length === 0) {
@@ -217,8 +90,8 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
         return;
       }
       
-      const totalFramesForAnimation = getTotalFramesForAnimation();
-      const qualitySettings = getQualitySettings();
+      const totalFramesForAnimation = getTotalFramesForAnimation(settings);
+      const qualitySettings = getQualitySettings(settings);
       
       console.log(`Exporting video with ${totalFramesForAnimation} frames at ${settings.frameRate} fps for ${durationInSeconds} seconds`);
       console.log(`Quality settings: ${qualitySettings.width}x${qualitySettings.height} at ${qualitySettings.bitrate} bps`);
@@ -277,21 +150,6 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
     }
   };
   
-  useEffect(() => {
-    getTotalFramesForAnimation();
-  }, [settings.frameRate, settings.duration]);
-  
-  useEffect(() => {
-    if (!settings.useCustomResolution) {
-      const qualitySettings = getQualitySettings();
-      setSettings(prev => ({
-        ...prev,
-        customWidth: qualitySettings.width,
-        customHeight: qualitySettings.height
-      }));
-    }
-  }, [settings.quality, settings.useCustomResolution]);
-  
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
       <div className="flex items-center justify-between mb-4">
@@ -327,296 +185,38 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       )}
       
       {isExporting ? (
-        <div className="space-y-2 my-4">
-          <div className="flex items-center justify-between text-sm">
-            <span>Exporting video...</span>
-            <span>{exportProgress}%</span>
-          </div>
-          <Progress value={exportProgress} className="h-2" />
-          <p className="text-sm text-muted-foreground">
-            Preparing your animation with {getTotalFramesForAnimation()} frames at {settings.quality} quality
-            {settings.includeAudio && " with audio"}
-          </p>
-        </div>
+        <ExportProgress 
+          exportProgress={exportProgress} 
+          settings={settings} 
+        />
       ) : (
-        <div className="grid grid-cols-1 gap-4 my-4">
-          <div className="space-y-2">
-            <Label htmlFor="duration">Animation Duration (seconds)</Label>
-            <Input
-              id="duration"
-              type="number"
-              min="1"
-              max="60"
-              value={settings.duration}
-              onChange={(e) => handleSettingChange('duration', e.target.value)}
-              className="w-full"
-            />
-            <p className="text-xs text-animation-gray-500">
-              This will create a {getTotalFramesForAnimation()} frame animation at {settings.frameRate} fps
-            </p>
-          </div>
+        <>
+          <BasicSettings
+            settings={settings}
+            onSettingChange={handleSettingChange}
+            isMacOS={isMacOS}
+            hasWebCodecSupport={hasWebCodecSupport}
+          />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Quality</label>
-              <Select
-                value={settings.quality}
-                onValueChange={(value) => handleSettingChange('quality', value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select quality" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low (640x360)</SelectItem>
-                  <SelectItem value="medium">Medium (720p)</SelectItem>
-                  <SelectItem value="high">High (1080p)</SelectItem>
-                  <SelectItem value="ultra">Ultra HD (4K)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Format</label>
-              <Select
-                value={settings.format}
-                onValueChange={(value) => handleSettingChange('format', value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select format" />
-                </SelectTrigger>
-                <SelectContent>
-                  {getAvailableFormats().map(format => (
-                    <SelectItem key={format} value={format}>
-                      {format.toUpperCase()}
-                      {format === "gif" && isMacOS && " (Recommended)"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {isMacOS && settings.format !== "gif" && (
-                <p className="text-xs text-amber-500">
-                  Some Mac devices may have limited support for this format
-                </p>
-              )}
-            </div>
-          </div>
-          
-          {/* Audio Section */}
-          <div className="space-y-2 border-t pt-4 mt-2">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium flex items-center">
-                Audio Settings
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 ml-1 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Add background music to your animation</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </h4>
-              {settings.format === "gif" && (
-                <p className="text-xs text-amber-500">
-                  GIF format does not support audio
-                </p>
-              )}
-            </div>
-            
-            <div className="flex items-center space-x-2 mb-2">
-              <Checkbox
-                id="include-audio"
-                checked={settings.includeAudio}
-                disabled={settings.format === "gif" || !settings.audioFile}
-                onCheckedChange={(checked) => handleSettingChange('includeAudio', checked === true)}
-              />
-              <Label htmlFor="include-audio">
-                Include audio in export
-              </Label>
-            </div>
-            
-            <div className="grid grid-cols-1 gap-2">
-              <div>
-                <input
-                  ref={audioInputRef}
-                  type="file"
-                  accept="audio/*"
-                  onChange={handleAudioFileChange}
-                  className="hidden"
-                  id="audio-file-input"
-                />
-                
-                {settings.audioFile ? (
-                  <div className="flex items-center justify-between bg-gray-50 p-2 rounded border">
-                    <div className="flex items-center space-x-2">
-                      <Music className="h-4 w-4 text-animation-purple" />
-                      <span className="text-sm truncate max-w-[200px]">{settings.audioFile.name}</span>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={removeAudio}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => document.getElementById('audio-file-input')?.click()}
-                  >
-                    <Music className="mr-2 h-4 w-4" />
-                    Add Audio File
-                  </Button>
-                )}
-              </div>
-              
-              {settings.audioFile && (
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="audio-volume">Audio Volume</Label>
-                    <span className="text-sm text-animation-gray-500">
-                      {settings.audioVolume}%
-                    </span>
-                  </div>
-                  <Slider
-                    id="audio-volume"
-                    min={0}
-                    max={100}
-                    step={5}
-                    value={[settings.audioVolume]}
-                    onValueChange={(value) => handleSettingChange('audioVolume', value[0])}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
+          <AudioSettings 
+            settings={settings} 
+            onSettingChange={handleSettingChange} 
+          />
           
           {showAdvancedSettings && (
-            <div className="space-y-4 border-t pt-4 mt-2">
-              <h4 className="text-sm font-medium flex items-center">
-                Advanced Settings
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 ml-1 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>These settings affect the output quality and file size</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </h4>
-              
-              <div className="space-y-2">
-                <Label htmlFor="frameRate">Frame Rate (FPS)</Label>
-                <Select
-                  value={settings.frameRate.toString()}
-                  onValueChange={(value) => handleSettingChange('frameRate', parseInt(value))}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select frame rate" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="24">24 fps (Film)</SelectItem>
-                    <SelectItem value="30">30 fps (Standard)</SelectItem>
-                    <SelectItem value="60">60 fps (Smooth)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="custom-resolution"
-                    checked={settings.useCustomResolution}
-                    onCheckedChange={(checked) => handleSettingChange('useCustomResolution', checked === true)}
-                  />
-                  <Label htmlFor="custom-resolution">Use custom resolution</Label>
-                </div>
-                
-                {settings.useCustomResolution && (
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    <div>
-                      <Label htmlFor="width">Width</Label>
-                      <Input
-                        id="width"
-                        type="number"
-                        min="320"
-                        max="3840"
-                        step="16"
-                        value={settings.customWidth}
-                        onChange={(e) => handleSettingChange('customWidth', parseInt(e.target.value))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="height">Height</Label>
-                      <Input
-                        id="height"
-                        type="number"
-                        min="240"
-                        max="2160"
-                        step="16"
-                        value={settings.customHeight}
-                        onChange={(e) => handleSettingChange('customHeight', parseInt(e.target.value))}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor="compression">Compression Level</Label>
-                  <span className="text-sm text-animation-gray-500">
-                    {settings.compressionLevel}%
-                  </span>
-                </div>
-                <Slider
-                  id="compression"
-                  min={10}
-                  max={100}
-                  step={1}
-                  value={[settings.compressionLevel]}
-                  onValueChange={(value) => handleSettingChange('compressionLevel', value[0])}
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Smaller file</span>
-                  <span>Better quality</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="watermark"
-                  checked={settings.includeWatermark}
-                  onCheckedChange={(checked) => handleSettingChange('includeWatermark', checked === true)}
-                />
-                <Label htmlFor="watermark">
-                  Include watermark
-                </Label>
-              </div>
-            </div>
+            <AdvancedSettings 
+              settings={settings} 
+              onSettingChange={handleSettingChange} 
+            />
           )}
-        </div>
+        </>
       )}
       
-      <div className="text-sm text-animation-gray-500">
-        <p>Frame count: {frames.length} frames</p>
-        <p>Frame rate: {settings.frameRate} fps</p>
-        <p>Animation duration: {settings.duration} seconds</p>
-        <p>Total animation frames: {getTotalFramesForAnimation()} frames</p>
-        <p>Output resolution: {settings.useCustomResolution 
-          ? `${settings.customWidth}x${settings.customHeight}` 
-          : `${getQualitySettings().width}x${getQualitySettings().height}`}
-        </p>
-        <p>Export format: {settings.format.toUpperCase()}{isMacOS && settings.format === "gif" ? " (Best for Mac)" : ""}</p>
-        {settings.includeAudio && settings.audioFile && (
-          <p>Audio: {settings.audioFile.name} ({(settings.audioFile.size / (1024 * 1024)).toFixed(2)}MB) at {settings.audioVolume}% volume</p>
-        )}
-      </div>
+      <ExportSummary 
+        settings={settings} 
+        frames={frames} 
+        isMacOS={isMacOS} 
+      />
     </div>
   );
 };
