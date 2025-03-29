@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,24 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom animation palette
+				animation: {
+					purple: {
+						light: '#E5DEFF',
+						DEFAULT: '#8B5CF6',
+						dark: '#6E59A5'
+					},
+					gray: {
+						100: '#F6F6F7',
+						200: '#F1F0FB',
+						300: '#C8C8C9',
+						400: '#8E9196',
+						500: '#555555',
+						600: '#333333',
+						700: '#221F26',
+						800: '#1A1F2C'
+					}
 				}
 			},
 			borderRadius: {
@@ -84,11 +103,53 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'fade-out': {
+					'0%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					},
+					'100%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					}
+				},
+				'scale-in': {
+					'0%': {
+						transform: 'scale(0.95)',
+						opacity: '0'
+					},
+					'100%': {
+						transform: 'scale(1)',
+						opacity: '1'
+					}
+				},
+				'pulse-purple': {
+					'0%, 100%': {
+						backgroundColor: 'rgba(139, 92, 246, 0.1)'
+					},
+					'50%': {
+						backgroundColor: 'rgba(139, 92, 246, 0.2)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'fade-out': 'fade-out 0.3s ease-out',
+				'scale-in': 'scale-in 0.2s ease-out',
+				'pulse-purple': 'pulse-purple 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
 			}
 		}
 	},
