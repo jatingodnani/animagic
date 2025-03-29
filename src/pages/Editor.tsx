@@ -10,7 +10,8 @@ import VideoExporter from '@/components/VideoExporter';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Presentation, Sparkles, Wand2, Film, Video } from 'lucide-react';
+import { useResponsive } from '@/hooks/use-mobile';
+import { ArrowLeft, Presentation, Sparkles, Wand2, Film, Video, PanelLeft, PanelRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { previewAnimation } from '@/utils/frameAnimationUtils';
 import { Button } from "@/components/ui/button";
@@ -21,10 +22,12 @@ const Editor = () => {
   const [frames, setFrames] = useState<string[]>([]);
   const [selectedFrame, setSelectedFrame] = useState(0);
   const [previewEffect, setPreviewEffect] = useState<AnimationEffect | null>(null);
-  const [activeEffects, setActiveEffects] = useState<AnimationEffect[]>([]); // Changed to array
+  const [activeEffects, setActiveEffects] = useState<AnimationEffect[]>([]);
   const [frameRate] = useState(24);
-  const [animationDuration, setAnimationDuration] = useState(5); // Default 5 seconds
+  const [animationDuration, setAnimationDuration] = useState(5);
+  const [showSidebar, setShowSidebar] = useState(true);
   const { toast } = useToast();
+  const { isMobile, isTablet } = useResponsive();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationCleanupRef = useRef<(() => void) | null>(null);
   
@@ -134,34 +137,57 @@ const Editor = () => {
     };
   }, []);
 
+  useEffect(() => {
+    // Auto-hide sidebar on mobile and show it on larger screens
+    setShowSidebar(!isMobile);
+  }, [isMobile]);
+
+  const toggleSidebar = () => {
+    setShowSidebar(prev => !prev);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       
-      <main className="flex-grow p-4 md:py-8 md:px-6 overflow-x-hidden">
+      <main className="flex-grow p-2 sm:p-4 md:py-6 md:px-4 lg:py-8 lg:px-6 overflow-x-hidden">
         <div className="container max-w-full lg:max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
             <div className="flex items-center gap-2">
               <Link to="/" className="text-gray-500 hover:text-animation-purple transition-colors">
                 <ArrowLeft className="h-4 w-4" />
               </Link>
-              <h1 className="text-xl md:text-2xl font-semibold">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-semibold">
                 Video Animation Editor
               </h1>
             </div>
             
-            <Link to="/presentation">
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Presentation className="h-4 w-4" />
-                <span className="hidden md:inline">Presentation Mode</span>
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              {!isMobile && frames.length > 0 && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={toggleSidebar}
+                  className="flex items-center gap-1 mr-2"
+                >
+                  {showSidebar ? <PanelRight className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+                  <span className="hidden md:inline">{showSidebar ? "Hide" : "Show"} Tools</span>
+                </Button>
+              )}
+              
+              <Link to="/presentation">
+                <Button variant="outline" size="sm" className="flex items-center gap-1">
+                  <Presentation className="h-4 w-4" />
+                  <span className="hidden md:inline">Presentation</span>
+                </Button>
+              </Link>
+            </div>
           </div>
           
           {!videoFile ? (
-            <div className="max-w-2xl mx-auto my-6 md:my-12">
-              <div className="mb-6 md:mb-8 text-center">
-                <h2 className="text-xl md:text-2xl font-semibold mb-3">
+            <div className="max-w-2xl mx-auto my-4 sm:my-6 md:my-8 lg:my-12">
+              <div className="mb-4 sm:mb-6 md:mb-8 text-center">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 md:mb-3">
                   Get Started
                 </h2>
                 <p className="text-gray-500">
@@ -169,28 +195,28 @@ const Editor = () => {
                 </p>
               </div>
               <div className="relative">
-                <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 shadow-sm">
+                <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 border border-gray-200 shadow-sm">
                   <VideoUploader onVideoLoaded={handleVideoLoaded} />
                 </div>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-              <div className="lg:col-span-2 space-y-4 md:space-y-6">
-                <div className="bg-white rounded-xl shadow-sm p-3 md:p-4 border border-gray-100">
-                  <Tabs defaultValue="preview" className="space-y-4">
+            <div className={`${isTablet ? 'flex flex-col' : 'grid grid-cols-1 lg:grid-cols-3'} gap-3 sm:gap-4 md:gap-6`}>
+              <div className={`${!showSidebar && !isTablet ? 'lg:col-span-3' : 'lg:col-span-2'} space-y-3 sm:space-y-4 md:space-y-6`}>
+                <div className="bg-white rounded-xl shadow-sm p-2 sm:p-3 md:p-4 border border-gray-100">
+                  <Tabs defaultValue="preview" className="space-y-3 sm:space-y-4">
                     <TabsList className="grid grid-cols-2">
-                      <TabsTrigger value="preview" className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4" />
+                      <TabsTrigger value="preview" className="flex items-center gap-1 sm:gap-2">
+                        <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
                         Preview
                       </TabsTrigger>
-                      <TabsTrigger value="original" className="flex items-center gap-2">
-                        <Video className="h-4 w-4" />
+                      <TabsTrigger value="original" className="flex items-center gap-1 sm:gap-2">
+                        <Video className="h-3 w-3 sm:h-4 sm:w-4" />
                         Original Video
                       </TabsTrigger>
                     </TabsList>
                     
-                    <TabsContent value="preview" className="space-y-4">
+                    <TabsContent value="preview" className="space-y-3 sm:space-y-4">
                       {frames.length > 0 && selectedFrame < frames.length ? (
                         <div className="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center relative">
                           <canvas
@@ -219,7 +245,7 @@ const Editor = () => {
                         </div>
                       ) : (
                         <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                          <p className="text-gray-500">
+                          <p className="text-gray-500 text-sm sm:text-base">
                             {frames.length === 0 
                               ? "Extract frames to preview them here" 
                               : "No frame selected"}
@@ -227,7 +253,7 @@ const Editor = () => {
                         </div>
                       )}
                       
-                      <div className="text-sm text-gray-500">
+                      <div className="text-xs sm:text-sm text-gray-500">
                         {frames.length > 0 && selectedFrame < frames.length ? (
                           <p>
                             Viewing frame {selectedFrame + 1} of {frames.length}
@@ -249,14 +275,14 @@ const Editor = () => {
                         </div>
                       ) : (
                         <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                          <p className="text-gray-500">No video loaded</p>
+                          <p className="text-gray-500 text-sm sm:text-base">No video loaded</p>
                         </div>
                       )}
                     </TabsContent>
                   </Tabs>
                 </div>
                 
-                <div>
+                <div className="overflow-x-auto">
                   <Timeline 
                     frames={frames} 
                     onFrameSelect={handleFrameSelect} 
@@ -264,33 +290,35 @@ const Editor = () => {
                 </div>
               </div>
               
-              <div className="space-y-4 md:space-y-6 w-full">
-                <div className="w-full">
-                  <FrameExtractor 
-                    videoUrl={videoUrl} 
-                    onFramesExtracted={handleFramesExtracted} 
-                  />
-                </div>
-                
-                {frames.length > 0 && (
+              {(showSidebar || isTablet) && (
+                <div className={`space-y-3 sm:space-y-4 md:space-y-6 w-full ${isTablet ? 'mt-4' : ''}`}>
                   <div className="w-full">
-                    <AnimationTools 
-                      selectedFrame={selectedFrame}
-                      totalFrames={frames.length}
-                      onApplyEffect={handleApplyEffect}
-                      onPreviewEffect={handlePreviewEffect}
+                    <FrameExtractor 
+                      videoUrl={videoUrl} 
+                      onFramesExtracted={handleFramesExtracted} 
                     />
                   </div>
-                )}
-                
-                <div className="w-full">
-                  <VideoExporter 
-                    frames={frames} 
-                    frameRate={frameRate}
-                    currentEffects={activeEffects} // Pass array of effects instead of single effect
-                  />
+                  
+                  {frames.length > 0 && (
+                    <div className="w-full">
+                      <AnimationTools 
+                        selectedFrame={selectedFrame}
+                        totalFrames={frames.length}
+                        onApplyEffect={handleApplyEffect}
+                        onPreviewEffect={handlePreviewEffect}
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="w-full">
+                    <VideoExporter 
+                      frames={frames} 
+                      frameRate={frameRate}
+                      currentEffects={activeEffects}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
