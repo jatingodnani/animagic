@@ -184,7 +184,7 @@ const HomePage = () => {
         <FloatingShapes count={6} className="opacity-20" />
         
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="flex flex-col items-center justify-center mb-16">
             <AnimatedText
               text="How It Works"
               className="text-3xl md:text-4xl font-bold mb-4 text-center mx-auto"
@@ -263,7 +263,7 @@ const HomePage = () => {
               <div className="absolute top-0 left-0 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-lg"></div>
               <div className="absolute bottom-0 right-0 w-40 h-40 bg-white/5 rounded-full translate-x-1/2 translate-y-1/2 blur-lg"></div>
               
-              <div className="text-center">
+              <div className="text-center flex flex-col items-center justify-center">
                 <AnimatedText
                   text="Ready to Transform Your Videos?"
                   className="text-3xl md:text-4xl font-bold text-white mb-6 text-center"
