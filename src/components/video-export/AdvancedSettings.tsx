@@ -70,7 +70,7 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ settings, onSetting
         </div>
         
         {settings.useCustomResolution && (
-          <div className="grid grid-cols-2 gap-2 mt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
             <div>
               <Label htmlFor="width">Width</Label>
               <Input

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -131,14 +130,14 @@ const Editor = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       
-      <main className="flex-grow py-8 px-4">
-        <div className="container max-w-7xl mx-auto">
+      <main className="flex-grow p-4 md:py-8 md:px-6 overflow-x-hidden">
+        <div className="container max-w-full lg:max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Link to="/" className="text-gray-500 hover:text-animation-purple transition-colors">
                 <ArrowLeft className="h-4 w-4" />
               </Link>
-              <h1 className="text-2xl font-semibold">
+              <h1 className="text-xl md:text-2xl font-semibold">
                 Video Animation Editor
               </h1>
             </div>
@@ -146,15 +145,15 @@ const Editor = () => {
             <Link to="/presentation">
               <Button variant="outline" size="sm" className="flex items-center gap-2">
                 <Presentation className="h-4 w-4" />
-                Presentation Mode
+                <span className="hidden md:inline">Presentation Mode</span>
               </Button>
             </Link>
           </div>
           
           {!videoFile ? (
-            <div className="max-w-2xl mx-auto my-12">
-              <div className="mb-8 text-center">
-                <h2 className="text-2xl font-semibold mb-3">
+            <div className="max-w-2xl mx-auto my-6 md:my-12">
+              <div className="mb-6 md:mb-8 text-center">
+                <h2 className="text-xl md:text-2xl font-semibold mb-3">
                   Get Started
                 </h2>
                 <p className="text-gray-500">
@@ -162,15 +161,15 @@ const Editor = () => {
                 </p>
               </div>
               <div className="relative">
-                <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+                <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 shadow-sm">
                   <VideoUploader onVideoLoaded={handleVideoLoaded} />
                 </div>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className="lg:col-span-2 space-y-4 md:space-y-6">
+                <div className="bg-white rounded-xl shadow-sm p-3 md:p-4 border border-gray-100">
                   <Tabs defaultValue="preview" className="space-y-4">
                     <TabsList className="grid grid-cols-2">
                       <TabsTrigger value="preview" className="flex items-center gap-2">
@@ -257,8 +256,8 @@ const Editor = () => {
                 </div>
               </div>
               
-              <div className="space-y-6">
-                <div>
+              <div className="space-y-4 md:space-y-6 w-full">
+                <div className="w-full">
                   <FrameExtractor 
                     videoUrl={videoUrl} 
                     onFramesExtracted={handleFramesExtracted} 
@@ -266,7 +265,7 @@ const Editor = () => {
                 </div>
                 
                 {frames.length > 0 && (
-                  <div>
+                  <div className="w-full">
                     <AnimationTools 
                       selectedFrame={selectedFrame}
                       totalFrames={frames.length}
@@ -276,7 +275,7 @@ const Editor = () => {
                   </div>
                 )}
                 
-                <div>
+                <div className="w-full">
                   <VideoExporter 
                     frames={frames} 
                     frameRate={frameRate} 

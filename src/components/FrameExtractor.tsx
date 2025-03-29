@@ -88,13 +88,13 @@ const FrameExtractor: React.FC<FrameExtractorProps> = ({ videoUrl, onFramesExtra
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium">Frame Extraction</h3>
+    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100 w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <h3 className="text-base md:text-lg font-medium">Frame Extraction</h3>
         <Button
           onClick={extractFrames}
           disabled={isExtracting}
-          className="bg-animation-purple hover:bg-animation-purple/90"
+          className="bg-animation-purple hover:bg-animation-purple/90 w-full sm:w-auto"
         >
           {isExtracting ? "Extracting..." : "Extract Frames"}
           <Layers className="ml-2 h-4 w-4" />
