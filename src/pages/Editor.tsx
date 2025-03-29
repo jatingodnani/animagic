@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -26,14 +25,12 @@ const Editor = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationCleanupRef = useRef<(() => void) | null>(null);
   
-  // Handle video upload
   const handleVideoLoaded = (file: File, url: string) => {
     setVideoFile(file);
     setVideoUrl(url);
     setFrames([]);
   };
   
-  // Handle frame extraction
   const handleFramesExtracted = (extractedFrames: string[]) => {
     setFrames(extractedFrames);
     if (extractedFrames.length > 0) {
@@ -41,28 +38,22 @@ const Editor = () => {
     }
   };
   
-  // Handle frame selection in timeline
   const handleFrameSelect = (index: number) => {
     setSelectedFrame(index);
     
-    // Clear any existing animation when changing frames
     if (animationCleanupRef.current) {
       animationCleanupRef.current();
       animationCleanupRef.current = null;
     }
     
-    // If there was an effect being previewed, restart it on the new frame
     if (previewEffect && canvasRef.current && frames[index]) {
       startPreviewAnimation(previewEffect);
     }
   };
   
-  // Apply animation effect to frames
   const handleApplyEffect = (effect: AnimationEffect, frameRange: [number, number], duration: number) => {
-    // Update the animation duration
     setAnimationDuration(duration);
     
-    // In a real implementation, this would actually modify the frames with the effect
     console.log(`Applying ${effect.type} effect with duration: ${duration}s to frames ${frameRange[0] + 1} to ${frameRange[1] + 1}`);
     
     toast({
@@ -70,21 +61,18 @@ const Editor = () => {
       description: `Applied ${effect.type} effect to frames ${frameRange[0] + 1} to ${frameRange[1] + 1} for ${duration} seconds`,
     });
     
-    // Clear preview after applying
-    stopPreviewAnimation();
-  };
-  
-  // Preview effect on current frame
-  const handlePreviewEffect = (effect: AnimationEffect | null, duration?: number) => {
-    // Clear existing animation
     stopPreviewAnimation();
     
-    // Update duration if provided
+    handlePreviewEffect(effect, duration);
+  };
+  
+  const handlePreviewEffect = (effect: AnimationEffect | null, duration?: number) => {
+    stopPreviewAnimation();
+    
     if (duration !== undefined) {
       setAnimationDuration(duration);
     }
     
-    // Set new effect and start preview if needed
     setPreviewEffect(effect);
     if (effect && canvasRef.current && frames[selectedFrame]) {
       console.log(`Starting preview with duration: ${duration || animationDuration}s`);
@@ -92,18 +80,21 @@ const Editor = () => {
     }
   };
   
-  // Start animation preview
   const startPreviewAnimation = (effect: AnimationEffect, duration?: number) => {
     if (!canvasRef.current || !frames[selectedFrame]) return;
     
     try {
-      // Stop any existing animation
       stopPreviewAnimation();
       
       const effectDuration = duration || animationDuration;
       console.log(`Starting animation preview with effect: ${effect.type}, duration: ${effectDuration}s`);
       
-      // Start new animation and store cleanup function
+      const canvasContainer = canvasRef.current.parentElement;
+      if (canvasContainer) {
+        const existingImages = canvasContainer.querySelectorAll('img');
+        existingImages.forEach(img => img.remove());
+      }
+      
       animationCleanupRef.current = previewAnimation(
         canvasRef.current,
         frames[selectedFrame],
@@ -120,15 +111,14 @@ const Editor = () => {
     }
   };
   
-  // Stop animation preview
   const stopPreviewAnimation = () => {
     if (animationCleanupRef.current) {
       animationCleanupRef.current();
       animationCleanupRef.current = null;
     }
+    setPreviewEffect(null);
   };
   
-  // Clean up animations when component unmounts
   useEffect(() => {
     return () => {
       stopPreviewAnimation();
@@ -160,9 +150,7 @@ const Editor = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column: Preview and Tools */}
               <div className="lg:col-span-2 space-y-6">
-                {/* Video/Frame Preview */}
                 <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                   <Tabs defaultValue="preview" className="space-y-4">
                     <TabsList className="grid grid-cols-2">
@@ -183,13 +171,11 @@ const Editor = () => {
                               alt={`Frame ${selectedFrame + 1}`}
                               className="max-h-full max-w-full object-contain absolute"
                               onLoad={(e) => {
-                                // Once image loads, set canvas size to match
                                 if (canvasRef.current) {
                                   const img = e.target as HTMLImageElement;
                                   canvasRef.current.width = img.naturalWidth;
                                   canvasRef.current.height = img.naturalHeight;
                                   
-                                  // Draw initial frame on canvas
                                   const ctx = canvasRef.current.getContext('2d');
                                   if (ctx) {
                                     ctx.drawImage(img, 0, 0);
@@ -236,24 +222,18 @@ const Editor = () => {
                   </Tabs>
                 </div>
                 
-                {/* Timeline */}
                 <Timeline 
                   frames={frames} 
                   onFrameSelect={handleFrameSelect} 
                 />
               </div>
               
-              {/* Right Column: Tools and Export */}
               <div className="space-y-6">
-                {/* Frame Extraction */}
-                {videoUrl && (
-                  <FrameExtractor 
-                    videoUrl={videoUrl} 
-                    onFramesExtracted={handleFramesExtracted} 
-                  />
-                )}
+                <FrameExtractor 
+                  videoUrl={videoUrl} 
+                  onFramesExtracted={handleFramesExtracted} 
+                />
                 
-                {/* Animation Tools */}
                 {frames.length > 0 && (
                   <AnimationTools 
                     selectedFrame={selectedFrame}
@@ -263,7 +243,6 @@ const Editor = () => {
                   />
                 )}
                 
-                {/* Export Options */}
                 <VideoExporter 
                   frames={frames} 
                   frameRate={frameRate} 

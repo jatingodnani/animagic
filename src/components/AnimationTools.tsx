@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Tabs, 
@@ -142,8 +141,7 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
   
   const handleApply = () => {
     onApplyEffect(effect, frameRange, duration);
-    setIsPreviewing(false);
-    onPreviewEffect(null);
+    setIsPreviewing(true);
   };
   
   const handlePreviewToggle = () => {

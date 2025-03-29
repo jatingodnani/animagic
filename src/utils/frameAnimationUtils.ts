@@ -1,3 +1,4 @@
+
 /**
  * Utilities for frame extraction, animation, and encoding using the Web Codecs API
  */
@@ -60,15 +61,15 @@ export async function applyAnimationEffect(
   },
   progress: number // 0 to 1 representing animation progress
 ): Promise<void> {
-  // Save the canvas state
-  ctx.save();
-  
   // Get frame dimensions
   const width = frame instanceof VideoFrame ? frame.displayWidth : frame.width;
   const height = frame instanceof VideoFrame ? frame.displayHeight : frame.height;
   
-  // Clear the canvas
+  // Clear the entire canvas first
   ctx.clearRect(0, 0, width, height);
+  
+  // Save the canvas state
+  ctx.save();
   
   // Normalize intensity to a useful range (0.1-2)
   const normalizedIntensity = effect.intensity / 50;
@@ -85,23 +86,26 @@ export async function applyAnimationEffect(
       break;
       
     case 'zoom':
-      const zoomCenter = width / 2;
+      const zoomCenterX = width / 2;
       const zoomCenterY = height / 2;
+      
+      // Clear canvas for zoom effect
+      ctx.clearRect(0, 0, width, height);
       
       if (effect.direction === 'in') {
         // Start small and grow
         const scale = 1 + (progress * normalizedIntensity);
         
-        ctx.translate(zoomCenter, zoomCenterY);
+        ctx.translate(zoomCenterX, zoomCenterY);
         ctx.scale(scale, scale);
-        ctx.translate(-zoomCenter, -zoomCenterY);
+        ctx.translate(-zoomCenterX, -zoomCenterY);
       } else { // 'out'
         // Start large and shrink
         const scale = 1 + (normalizedIntensity - (progress * normalizedIntensity));
         
-        ctx.translate(zoomCenter, zoomCenterY);
+        ctx.translate(zoomCenterX, zoomCenterY);
         ctx.scale(scale, scale);
-        ctx.translate(-zoomCenter, -zoomCenterY);
+        ctx.translate(-zoomCenterX, -zoomCenterY);
       }
       ctx.drawImage(frame, 0, 0, width, height);
       break;
@@ -110,15 +114,23 @@ export async function applyAnimationEffect(
       const centerX = width / 2;
       const centerY = height / 2;
       
-      ctx.translate(centerX, centerY);
+      // Clear canvas before rotation
+      ctx.clearRect(0, 0, width, height);
       
+      // Calculate rotation angle (in radians)
+      let rotationAngle;
       if (effect.direction === 'clockwise') {
-        ctx.rotate(progress * normalizedIntensity * Math.PI * 2);
+        rotationAngle = progress * normalizedIntensity * Math.PI * 2;
       } else { // 'counterclockwise'
-        ctx.rotate(-progress * normalizedIntensity * Math.PI * 2);
+        rotationAngle = -progress * normalizedIntensity * Math.PI * 2;
       }
       
+      // Apply rotation transformation
+      ctx.translate(centerX, centerY);
+      ctx.rotate(rotationAngle);
       ctx.translate(-centerX, -centerY);
+      
+      // Draw the rotated image
       ctx.drawImage(frame, 0, 0, width, height);
       break;
       
@@ -127,6 +139,7 @@ export async function applyAnimationEffect(
       let yOffset = 0;
       const moveAmount = width * normalizedIntensity; // Use width for horizontal, height for vertical
       
+      // Calculate position based on direction and progress
       switch(effect.direction) {
         case 'left':
           xOffset = -progress * moveAmount;
@@ -142,6 +155,7 @@ export async function applyAnimationEffect(
           break;
       }
       
+      // Draw the image at the calculated position
       ctx.drawImage(frame, xOffset, yOffset, width, height);
       break;
       
@@ -328,9 +342,12 @@ export function previewAnimation(
     const elapsedTime = timestamp - startTime;
     const elapsedSeconds = elapsedTime / 1000;
     
-    // Calculate progress (0 to 1) based on actual elapsed time
+    // Calculate progress (0 to 1) based on actual elapsed time, ensuring it loops properly
     // This ensures the animation takes exactly durationInSeconds to complete
-    let progress = (elapsedSeconds % durationInSeconds) / durationInSeconds;
+    const progress = (elapsedSeconds % durationInSeconds) / durationInSeconds;
+    
+    // Clear canvas before drawing the next frame to prevent overlapping
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Apply the animation effect based on current progress
     applyAnimationEffect(ctx, img, effect, progress);
