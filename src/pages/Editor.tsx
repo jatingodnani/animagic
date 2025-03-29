@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -8,7 +9,7 @@ import AnimationTools, { AnimationEffect } from '@/components/AnimationTools';
 import VideoExporter from '@/components/VideoExporter';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Presentation, Sparkles, Wand2, Film, Video } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { previewAnimation } from '@/utils/frameAnimationUtils';
@@ -20,6 +21,7 @@ const Editor = () => {
   const [frames, setFrames] = useState<string[]>([]);
   const [selectedFrame, setSelectedFrame] = useState(0);
   const [previewEffect, setPreviewEffect] = useState<AnimationEffect | null>(null);
+  const [activeEffect, setActiveEffect] = useState<AnimationEffect | null>(null);
   const [frameRate] = useState(24);
   const [animationDuration, setAnimationDuration] = useState(5); // Default 5 seconds
   const { toast } = useToast();
@@ -54,6 +56,7 @@ const Editor = () => {
   
   const handleApplyEffect = (effect: AnimationEffect, frameRange: [number, number], duration: number) => {
     setAnimationDuration(duration);
+    setActiveEffect(effect); // Store the active effect for the VideoExporter
     
     console.log(`Applying ${effect.type} effect with duration: ${duration}s to frames ${frameRange[0] + 1} to ${frameRange[1] + 1}`);
     
@@ -278,7 +281,8 @@ const Editor = () => {
                 <div className="w-full">
                   <VideoExporter 
                     frames={frames} 
-                    frameRate={frameRate} 
+                    frameRate={frameRate}
+                    currentEffect={activeEffect} // Pass the active effect to the exporter
                   />
                 </div>
               </div>

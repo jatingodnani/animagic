@@ -1,10 +1,15 @@
 
+import { AnimationEffect } from "@/components/AnimationTools";
+
 export interface ExportSettings {
-  quality: string;
-  format: string;
+  quality: "low" | "medium" | "high" | "ultra";
+  format: "mp4" | "webm" | "gif" | "mov";
   frameRate: number;
   duration: string;
-  resolution: { width: number; height: number };
+  resolution: {
+    width: number;
+    height: number;
+  };
   customWidth: number;
   customHeight: number;
   useCustomResolution: boolean;
@@ -18,12 +23,5 @@ export interface ExportSettings {
 export interface VideoExporterProps {
   frames: string[];
   frameRate?: number;
-}
-
-export interface PerformanceMetrics {
-  frameExtractionTime: number;
-  processingTime: number;
-  exportTime: number;
-  memoryUsage: number;
-  compressionRatio: number;
+  currentEffect?: AnimationEffect | null;
 }

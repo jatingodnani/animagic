@@ -10,6 +10,7 @@ import {
   getTotalFramesForAnimation, 
   getQualitySettings 
 } from '@/utils/videoExportUtils';
+import { applyAnimationEffect } from '@/utils/frameAnimationUtils';
 
 // Import sub-components
 import BasicSettings from './video-export/BasicSettings';
@@ -18,7 +19,7 @@ import AudioSettings from './video-export/AudioSettings';
 import ExportProgress from './video-export/ExportProgress';
 import ExportSummary from './video-export/ExportSummary';
 
-const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 }) => {
+const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, currentEffect = null }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
@@ -75,7 +76,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
     };
   }, [exportedVideoUrl]);
   
-  const createDummyVideo = async (): Promise<Blob> => {
+  const createVideoFromFrames = async (): Promise<Blob> => {
     // Create a canvas to draw frames
     const canvas = document.createElement('canvas');
     const qualitySettings = getQualitySettings(settings);
@@ -104,8 +105,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       return new Blob([new ArrayBuffer(1000)], { type: 'image/gif' });
     }
     
-    // For video formats, create a real video
-    // This is just a placeholder - in a real app, use proper video encoding libraries
+    // For video formats, create a real video using MediaRecorder
     try {
       // Create MediaRecorder with canvas stream
       const stream = canvas.captureStream(settings.frameRate);
@@ -134,20 +134,36 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
         };
       });
       
-      // Draw frames to canvas sequentially
+      // Calculate the total frames needed for the animation
       const totalFrames = getTotalFramesForAnimation(settings);
       const frameDuration = 1000 / settings.frameRate;
       
+      // Draw frames to canvas sequentially with animation effects
       for (let i = 0; i < totalFrames; i++) {
         const frameIndex = Math.min(i % frameImages.length, frameImages.length - 1);
+        const frameImg = frameImages[frameIndex];
+        
+        // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(frameImages[frameIndex], 0, 0, canvas.width, canvas.height);
+        
+        // If we have an effect to apply, use it
+        if (currentEffect) {
+          // Calculate the progress based on the current frame (0 to 1)
+          const progress = i / (totalFrames - 1);
+          
+          // Apply the animation effect at the current progress point
+          await applyAnimationEffect(ctx, frameImg, currentEffect, progress);
+        } else {
+          // No animation effect, just draw the frame
+          ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+        }
         
         // Update progress
         const progress = Math.round((i + 1) / totalFrames * 100);
         setExportProgress(progress);
         
-        await new Promise(resolve => setTimeout(resolve, frameDuration / 2)); // Simulate frame time
+        // Wait a small amount before drawing the next frame
+        await new Promise(resolve => setTimeout(resolve, frameDuration / 10));
       }
       
       // Stop recording
@@ -194,6 +210,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       console.log(`Quality settings: ${qualitySettings.width}x${qualitySettings.height} at ${qualitySettings.bitrate} bps`);
       console.log(`Platform: ${isMacOS ? 'macOS' : 'Other'}, Format: ${settings.format}`);
       console.log(`Audio included: ${settings.includeAudio}, Audio file: ${settings.audioFile?.name || 'None'}`);
+      console.log(`Animation effect applied: ${currentEffect ? currentEffect.type : 'None'}`);
       
       if (isMacOS && settings.format !== "gif" && !hasWebCodecSupport) {
         toast({
@@ -209,8 +226,8 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
         });
       }
       
-      // Create the video file
-      const videoBlob = await createDummyVideo();
+      // Create the video file with animation effects
+      const videoBlob = await createVideoFromFrames();
       
       // Create a download URL
       const videoUrl = URL.createObjectURL(videoBlob);
@@ -232,7 +249,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       
       toast({
         title: "Export completed",
-        description: `Your ${durationInSeconds}-second animated video has been exported as ${settings.format.toUpperCase()} with ${totalFramesForAnimation} frames${settings.includeAudio ? ' and audio' : ''}.`,
+        description: `Your ${durationInSeconds}-second animated video has been exported as ${settings.format.toUpperCase()} with ${totalFramesForAnimation} frames${currentEffect ? ` and ${currentEffect.type} effect` : ''}${settings.includeAudio ? ' and audio' : ''}.`,
       });
     } catch (error) {
       console.error("Error exporting video:", error);
