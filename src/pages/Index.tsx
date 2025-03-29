@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,8 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import Testimonials from '@/components/Testimonials';
+import StatsCounter from '@/components/StatsCounter';
 
 const Index = () => {
   const [animateHero, setAnimateHero] = useState(false);
@@ -146,6 +147,9 @@ const Index = () => {
         </div>
       </section>
       
+      {/* Stats Counter Section */}
+      <StatsCounter />
+      
       {/* Example Animations */}
       <section className="py-16 px-4 bg-white">
         <div className="container max-w-7xl mx-auto">
@@ -218,6 +222,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+      
+      {/* Testimonials Section */}
+      <Testimonials />
       
       {/* How It Works */}
       <section id="tutorial" className="py-16 px-4 bg-white">
