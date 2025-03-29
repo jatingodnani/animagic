@@ -175,6 +175,8 @@ export async function animateFrame(
   }
   
   const totalFrames = Math.round(durationInSeconds * fps);
+  console.log(`Creating animation with ${totalFrames} frames over ${durationInSeconds} seconds at ${fps} fps`);
+  
   const animatedFrames: VideoFrame[] = [];
   
   for (let i = 0; i < totalFrames; i++) {
@@ -270,6 +272,8 @@ export async function createAnimatedVideo(
   fps: number
 ): Promise<Blob> {
   try {
+    console.log(`Creating animated video for ${animationDurationInSeconds} seconds at ${fps} fps`);
+    
     // Extract the target frame
     const extractedFrame = await extractFrame(videoFile, targetFrameIndex);
     
@@ -301,6 +305,8 @@ export function previewAnimation(
   },
   durationInSeconds: number = 5 // Default preview duration of 5 seconds
 ): () => void {
+  console.log(`Previewing animation for ${durationInSeconds} seconds`);
+  
   const ctx = canvas.getContext('2d');
   if (!ctx) {
     throw new Error('Could not get canvas context');
@@ -312,8 +318,6 @@ export function previewAnimation(
   
   // Animation parameters
   const fps = 60;
-  const totalFrames = durationInSeconds * fps;
-  let frameCount = 0;
   let animationId: number;
   let startTime: number | null = null;
   
@@ -348,6 +352,8 @@ export function previewAnimation(
       canvas.width = img.width;
       canvas.height = img.height;
     }
+    
+    console.log(`Starting animation preview with dimensions ${img.width}x${img.height}`);
     
     // Start the animation
     animationId = requestAnimationFrame(animate);

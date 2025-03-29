@@ -30,6 +30,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
   // Calculate total frames based on duration and frame rate
   const getTotalFramesForAnimation = () => {
     const duration = parseFloat(animationDuration);
+    if (isNaN(duration) || duration <= 0) return frameRate * 5; // Default to 5 seconds
     return Math.round(duration * frameRate);
   };
   
@@ -62,7 +63,18 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       
       // Calculate total frames for the animation based on duration and frame rate
       const durationInSeconds = parseFloat(animationDuration);
+      if (isNaN(durationInSeconds) || durationInSeconds <= 0) {
+        toast({
+          title: "Invalid duration",
+          description: "Please enter a valid duration greater than 0.",
+          variant: "destructive"
+        });
+        setIsExporting(false);
+        return;
+      }
+      
       const totalFramesForAnimation = getTotalFramesForAnimation();
+      console.log(`Exporting video with ${totalFramesForAnimation} frames at ${frameRate} fps for ${durationInSeconds} seconds`);
       
       // Simulate video export process
       let progress = 0;
@@ -84,13 +96,13 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
             
             toast({
               title: "Export completed",
-              description: `Your ${animationDuration}-second animated video has been exported successfully with ${totalFramesForAnimation} frames.`,
+              description: `Your ${durationInSeconds}-second animated video has been exported successfully with ${totalFramesForAnimation} frames.`,
             });
             
             // Simulate download
             const a = document.createElement("a");
             a.href = "#";
-            a.download = `animated-video-${animationDuration}s.${exportFormat}`;
+            a.download = `animated-video-${durationInSeconds}s.${exportFormat}`;
             a.click();
           }, 1000);
         }
