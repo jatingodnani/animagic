@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Layers, Play } from 'lucide-react';
 
 interface FrameExtractorProps {
@@ -88,7 +88,7 @@ const FrameExtractor: React.FC<FrameExtractorProps> = ({ videoUrl, onFramesExtra
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100 w-full">
+    <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <h3 className="text-base md:text-lg font-medium">Frame Extraction</h3>
         <Button
