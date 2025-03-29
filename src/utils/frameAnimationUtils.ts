@@ -55,9 +55,14 @@ export async function applyAnimationEffect(
   ctx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
   frame: VideoFrame | HTMLImageElement,
   effect: {
-    type: 'fade' | 'zoom' | 'rotate' | 'move';
+    type: 'fade' | 'zoom' | 'rotate' | 'move' | 'blur' | 'color' | 'sparkle';
     intensity: number;
     direction?: 'in' | 'out' | 'left' | 'right' | 'up' | 'down' | 'clockwise' | 'counterclockwise';
+    color?: string;
+    keyframes?: {
+      position: number; // 0-100 percent of duration
+      intensity: number;
+    }[];
   },
   progress: number // 0 to 1 representing animation progress
 ): Promise<void> {
@@ -158,6 +163,90 @@ export async function applyAnimationEffect(
       // Draw the image at the calculated position
       ctx.drawImage(frame, xOffset, yOffset, width, height);
       break;
+    
+    case 'blur':
+      // Apply blur filter
+      const blurAmount = Math.max(1, Math.round(normalizedIntensity * 20 * progress)); // 1-40px blur
+      
+      // Unfortunately, OffscreenCanvas doesn't support filter CSS property
+      // We need to simulate blur using multiple draws with offsets
+      if (blurAmount > 1) {
+        ctx.globalAlpha = 0.3;
+        const iterations = 3; // More iterations = better blur quality
+        
+        for (let i = -iterations; i <= iterations; i++) {
+          for (let j = -iterations; j <= iterations; j++) {
+            ctx.drawImage(
+              frame, 
+              i * blurAmount / iterations, 
+              j * blurAmount / iterations, 
+              width, 
+              height
+            );
+          }
+        }
+        ctx.globalAlpha = 1;
+      } else {
+        ctx.drawImage(frame, 0, 0, width, height);
+      }
+      break;
+      
+    case 'color':
+      // Draw the original image
+      ctx.drawImage(frame, 0, 0, width, height);
+      
+      // Apply color overlay with intensity as opacity
+      if (effect.color) {
+        ctx.globalCompositeOperation = 'overlay';
+        ctx.globalAlpha = progress * (normalizedIntensity * 0.7); // Max 70% overlay
+        ctx.fillStyle = effect.color;
+        ctx.fillRect(0, 0, width, height);
+      }
+      break;
+      
+    case 'sparkle':
+      // Draw the original image
+      ctx.drawImage(frame, 0, 0, width, height);
+      
+      // Draw sparkles
+      const sparkleCount = Math.round(normalizedIntensity * 20); // 10-40 sparkles
+      
+      ctx.globalCompositeOperation = 'lighter';
+      
+      for (let i = 0; i < sparkleCount; i++) {
+        // Calculate position based on progress - make sparkles move across the image
+        const posX = Math.random() * width;
+        const posY = Math.random() * height;
+        
+        // Size based on progress - make sparkles grow and shrink
+        const sizeFactor = Math.sin((progress * Math.PI) + (i * 0.2));
+        const size = 2 + (sizeFactor * 5);
+        
+        // Opacity based on progress and position
+        ctx.globalAlpha = 0.6 * sizeFactor;
+        
+        // Draw a sparkle (small star)
+        ctx.fillStyle = 'white';
+        
+        // Draw a simple star
+        ctx.beginPath();
+        ctx.arc(posX, posY, size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add a glow
+        const gradient = ctx.createRadialGradient(posX, posY, 0, posX, posY, size * 2);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(posX, posY, size * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+      break;
       
     default:
       // Default to just drawing the frame
@@ -172,9 +261,10 @@ export async function applyAnimationEffect(
 export async function animateFrame(
   frame: VideoFrame,
   effect: {
-    type: 'fade' | 'zoom' | 'rotate' | 'move';
+    type: 'fade' | 'zoom' | 'rotate' | 'move' | 'blur' | 'color' | 'sparkle';
     intensity: number;
     direction?: 'in' | 'out' | 'left' | 'right' | 'up' | 'down' | 'clockwise' | 'counterclockwise';
+    color?: string;
   },
   durationInSeconds: number,
   fps: number
@@ -277,9 +367,10 @@ export async function createAnimatedVideo(
   videoFile: File,
   targetFrameIndex: number,
   effect: {
-    type: 'fade' | 'zoom' | 'rotate' | 'move';
+    type: 'fade' | 'zoom' | 'rotate' | 'move' | 'blur' | 'color' | 'sparkle';
     intensity: number;
     direction?: 'in' | 'out' | 'left' | 'right' | 'up' | 'down' | 'clockwise' | 'counterclockwise';
+    color?: string;
   },
   animationDurationInSeconds: number,
   fps: number
@@ -312,9 +403,10 @@ export function previewAnimation(
   canvas: HTMLCanvasElement,
   frameDataUrl: string,
   effect: {
-    type: 'fade' | 'zoom' | 'rotate' | 'move';
+    type: 'fade' | 'zoom' | 'rotate' | 'move' | 'blur' | 'color' | 'sparkle';
     intensity: number;
     direction?: 'in' | 'out' | 'left' | 'right' | 'up' | 'down' | 'clockwise' | 'counterclockwise';
+    color?: string;
   },
   durationInSeconds: number = 5 // Default preview duration of 5 seconds
 ): () => void {
@@ -376,4 +468,38 @@ export function previewAnimation(
       cancelAnimationFrame(animationId);
     }
   };
+}
+
+// New utility function to save an animation preset
+export function saveAnimationPreset(preset: {
+  name: string;
+  type: string;
+  intensity: number;
+  direction?: string;
+  duration: number;
+  color?: string;
+}) {
+  // Get existing presets from localStorage
+  const existingPresetsString = localStorage.getItem('animationPresets');
+  let existingPresets = existingPresetsString ? JSON.parse(existingPresetsString) : [];
+  
+  // Add new preset with unique ID
+  const newPreset = {
+    ...preset,
+    id: `custom-${Date.now()}`,
+  };
+  
+  // Add to start of array
+  existingPresets = [newPreset, ...existingPresets];
+  
+  // Save back to localStorage
+  localStorage.setItem('animationPresets', JSON.stringify(existingPresets));
+  
+  return newPreset;
+}
+
+// Function to get user-saved presets
+export function getUserPresets() {
+  const presetsString = localStorage.getItem('animationPresets');
+  return presetsString ? JSON.parse(presetsString) : [];
 }
