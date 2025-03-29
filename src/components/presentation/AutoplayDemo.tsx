@@ -20,31 +20,31 @@ const AutoplayDemo: React.FC<AutoplayDemoProps> = ({ onClose }) => {
     {
       title: "Welcome to AniMagic",
       description: "AniMagic is a powerful web-based video animation platform that transforms ordinary videos into captivating animations.",
-      image: "/placeholder.svg",
+      image: "https://res.cloudinary.com/dyve1c6cb/image/upload/v1743248006/aonk3lhlrewaq06viaaq.png",
       duration: 5000,
     },
     {
       title: "Upload Your Videos",
       description: "Start by uploading any video file up to 500MB. Our system accepts MP4, AVI, and MOV formats.",
-      image: "/placeholder.svg",
+      image: "https://res.cloudinary.com/dyve1c6cb/image/upload/v1743247247/mjilqiovcf6rwzqxjd4i.png",
       duration: 4000,
     },
     {
       title: "Extract Frames",
       description: "Our intelligent frame extraction automatically captures key moments from your video for animation.",
-      image: "/placeholder.svg",
+      image: "https://res.cloudinary.com/dyve1c6cb/image/upload/v1743247259/v5mkb4li8494wfdnmnqn.png",
       duration: 4000,
     },
     {
       title: "Apply Animation Effects",
       description: "Choose from a variety of effects including fade, zoom, rotate, move, blur, color overlays, and sparkle effects.",
-      image: "/placeholder.svg",
+      image: "https://res.cloudinary.com/dyve1c6cb/image/upload/v1743247232/ezafjpccxlhnnthygiio.png",
       duration: 5000,
     },
     {
       title: "Customize Duration & Intensity",
       description: "Fine-tune your animations with precise control over duration, intensity, and frame selection.",
-      image: "/placeholder.svg",
+      image: "https://res.cloudinary.com/dyve1c6cb/image/upload/v1743247232/ezafjpccxlhnnthygiio.png",
       duration: 4000,
     },
     {
@@ -56,7 +56,7 @@ const AutoplayDemo: React.FC<AutoplayDemoProps> = ({ onClose }) => {
     {
       title: "Export Options",
       description: "Export your creation in GIF, MP4, or WebM formats with customizable quality settings.",
-      image: "/placeholder.svg",
+      image: "https://res.cloudinary.com/dyve1c6cb/image/upload/v1743247222/m5aoubunpvpliifnbqnb.png",
       duration: 4000,
     },
     {

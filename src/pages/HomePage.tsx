@@ -98,7 +98,7 @@ const HomePage = () => {
                 className="w-full h-full object-cover rounded-2xl"
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-black/70 backdrop-blur-sm text-white px-6 py-4 rounded-lg text-center">
+                <div className="bg-black/70 backdrop-blur-sm text-white px-10 py-4 rounded-lg text-center">
                   <h3 className="text-xl font-semibold mb-2">Ready to Create?</h3>
                   <Link to="/editor">
                     <Button className="bg-animation-purple hover:bg-animation-purple/90 w-full">
@@ -116,7 +116,7 @@ const HomePage = () => {
         <FloatingShapes count={8} className="opacity-30" />
         
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="flex flex-col items-center justify-center text-center mb-16">
             <AnimatedText
               text="Powerful Features For Your Creativity"
               className="text-3xl md:text-4xl font-bold mb-4 text-center"

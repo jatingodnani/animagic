@@ -18,14 +18,11 @@ const Footer = () => {
               No software installation required.
             </p>
             <div className="flex items-center gap-4">
-              <a href="#" className="text-animation-gray-500 hover:text-animation-purple transition-colors">
+              <a href="https://x.com/JGodnani" className="text-animation-gray-500 hover:text-animation-purple transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="text-animation-gray-500 hover:text-animation-purple transition-colors">
+              <a href="https://github.com/jatingodnani/animedia-magic" className="text-animation-gray-500 hover:text-animation-purple transition-colors">
                 <Github className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-animation-gray-500 hover:text-animation-purple transition-colors">
-                <Instagram className="h-5 w-5" />
               </a>
             </div>
           </div>
