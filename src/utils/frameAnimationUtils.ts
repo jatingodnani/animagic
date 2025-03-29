@@ -159,7 +159,7 @@ export async function applyAnimationEffect(
   ctx.restore();
 }
 
-// Step 2: Animate the frame
+// Step 2: Animate the frame for a specific duration in seconds
 export async function animateFrame(
   frame: VideoFrame,
   effect: {
@@ -167,7 +167,7 @@ export async function animateFrame(
     intensity: number;
     direction?: 'in' | 'out' | 'left' | 'right' | 'up' | 'down' | 'clockwise' | 'counterclockwise';
   },
-  duration: number,
+  durationInSeconds: number,
   fps: number
 ): Promise<VideoFrame[]> {
   // Create an OffscreenCanvas with the frame dimensions
@@ -178,7 +178,7 @@ export async function animateFrame(
     throw new Error('Could not get canvas context');
   }
   
-  const totalFrames = Math.round(duration * fps);
+  const totalFrames = Math.round(durationInSeconds * fps);
   const animatedFrames: VideoFrame[] = [];
   
   for (let i = 0; i < totalFrames; i++) {
@@ -261,7 +261,7 @@ export async function encodeFrames(frames: VideoFrame[]): Promise<ArrayBuffer> {
   });
 }
 
-// Main function to create animated video from a single frame
+// Main function to create animated video from a single frame with a specified duration
 export async function createAnimatedVideo(
   videoFile: File,
   targetFrameIndex: number,
@@ -270,15 +270,15 @@ export async function createAnimatedVideo(
     intensity: number;
     direction?: 'in' | 'out' | 'left' | 'right' | 'up' | 'down' | 'clockwise' | 'counterclockwise';
   },
-  animationDuration: number,
+  animationDurationInSeconds: number,
   fps: number
 ): Promise<Blob> {
   try {
     // Extract the target frame
     const extractedFrame = await extractFrame(videoFile, targetFrameIndex);
     
-    // Apply animation to create sequence of frames
-    const animatedFrames = await animateFrame(extractedFrame, effect, animationDuration, fps);
+    // Apply animation to create sequence of frames for the specified duration
+    const animatedFrames = await animateFrame(extractedFrame, effect, animationDurationInSeconds, fps);
     
     // Close the original frame after we're done with it
     extractedFrame.close();
@@ -302,7 +302,8 @@ export function previewAnimation(
     type: 'fade' | 'zoom' | 'rotate' | 'move';
     intensity: number;
     direction?: 'in' | 'out' | 'left' | 'right' | 'up' | 'down' | 'clockwise' | 'counterclockwise';
-  }
+  },
+  durationInSeconds: number = 5 // Default preview duration of 5 seconds
 ): () => void {
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -315,23 +316,29 @@ export function previewAnimation(
   
   // Animation parameters
   const fps = 60;
-  const duration = 2; // seconds
-  const totalFrames = duration * fps;
+  const totalFrames = durationInSeconds * fps;
   let frameCount = 0;
   let animationId: number;
   
   // Animation function
   const animate = () => {
-    // Calculate progress (0 to 1, then back to 0)
-    // This creates a looping effect
-    const progress = Math.abs(Math.sin((frameCount / totalFrames) * Math.PI));
+    // Calculate progress (0 to 1)
+    // For looping animation we use sin, for one-time animation use frameCount/totalFrames directly
+    const progress = Math.min(frameCount / totalFrames, 1);
     
     // Apply the animation effect
     applyAnimationEffect(ctx, img, effect, progress);
     
     // Increment frame counter and request next frame
-    frameCount = (frameCount + 1) % totalFrames;
-    animationId = requestAnimationFrame(animate);
+    frameCount++;
+    
+    if (frameCount <= totalFrames) {
+      animationId = requestAnimationFrame(animate);
+    } else {
+      // Reset animation after completing the duration
+      frameCount = 0;
+      animationId = requestAnimationFrame(animate);
+    }
   };
   
   // Wait for image to load before starting animation

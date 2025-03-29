@@ -9,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Download, Film } from 'lucide-react';
 
@@ -22,6 +24,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
   const [exportProgress, setExportProgress] = useState(0);
   const [exportQuality, setExportQuality] = useState("medium");
   const [exportFormat, setExportFormat] = useState("mp4");
+  const [animationDuration, setAnimationDuration] = useState("5"); // Default 5 seconds
   const { toast } = useToast();
   
   const getQualitySettings = () => {
@@ -70,13 +73,13 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
             
             toast({
               title: "Export completed",
-              description: "Your animated video has been exported successfully.",
+              description: `Your ${animationDuration}-second animated video has been exported successfully.`,
             });
             
             // Simulate download
             const a = document.createElement("a");
             a.href = "#";
-            a.download = `animated-video.${exportFormat}`;
+            a.download = `animated-video-${animationDuration}s.${exportFormat}`;
             a.click();
           }, 1000);
         }
@@ -116,39 +119,54 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
           <Progress value={exportProgress} className="h-2" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+        <div className="grid grid-cols-1 gap-4 my-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Quality</label>
-            <Select
-              value={exportQuality}
-              onValueChange={setExportQuality}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select quality" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low (640x360)</SelectItem>
-                <SelectItem value="medium">Medium (720p)</SelectItem>
-                <SelectItem value="high">High (1080p)</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="duration">Animation Duration (seconds)</Label>
+            <Input
+              id="duration"
+              type="number"
+              min="1"
+              max="60"
+              value={animationDuration}
+              onChange={(e) => setAnimationDuration(e.target.value)}
+              className="w-full"
+            />
           </div>
           
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Format</label>
-            <Select
-              value={exportFormat}
-              onValueChange={setExportFormat}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select format" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="mp4">MP4</SelectItem>
-                <SelectItem value="webm">WebM</SelectItem>
-                <SelectItem value="gif">GIF</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Quality</label>
+              <Select
+                value={exportQuality}
+                onValueChange={setExportQuality}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select quality" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low (640x360)</SelectItem>
+                  <SelectItem value="medium">Medium (720p)</SelectItem>
+                  <SelectItem value="high">High (1080p)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Format</label>
+              <Select
+                value={exportFormat}
+                onValueChange={setExportFormat}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mp4">MP4</SelectItem>
+                  <SelectItem value="webm">WebM</SelectItem>
+                  <SelectItem value="gif">GIF</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       )}
@@ -156,7 +174,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       <div className="text-sm text-animation-gray-500">
         <p>Frame count: {frames.length} frames</p>
         <p>Frame rate: {frameRate} fps</p>
-        <p>Estimated duration: {(frames.length / frameRate).toFixed(1)} seconds</p>
+        <p>Animation duration: {animationDuration} seconds</p>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { 
   RotateCw, 
   ZoomIn, 
@@ -25,8 +26,8 @@ import {
 interface AnimationToolsProps {
   selectedFrame: number;
   totalFrames: number;
-  onApplyEffect: (effect: AnimationEffect, frameRange: [number, number]) => void;
-  onPreviewEffect: (effect: AnimationEffect | null) => void;
+  onApplyEffect: (effect: AnimationEffect, frameRange: [number, number], duration: number) => void;
+  onPreviewEffect: (effect: AnimationEffect | null, duration?: number) => void;
 }
 
 export interface AnimationEffect {
@@ -49,6 +50,7 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
   const [frameRange, setFrameRange] = useState<[number, number]>([selectedFrame, selectedFrame]);
   const [applyToAllFrames, setApplyToAllFrames] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [duration, setDuration] = useState(5); // Default 5 seconds
   
   useEffect(() => {
     if (!applyToAllFrames) {
@@ -99,7 +101,7 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
     setEffect(newEffect);
     
     if (isPreviewing) {
-      onPreviewEffect(newEffect);
+      onPreviewEffect(newEffect, duration);
     }
   };
   
@@ -112,7 +114,7 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
     setEffect(newEffect);
     
     if (isPreviewing) {
-      onPreviewEffect(newEffect);
+      onPreviewEffect(newEffect, duration);
     }
   };
   
@@ -125,12 +127,21 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
     setEffect(newEffect);
     
     if (isPreviewing) {
-      onPreviewEffect(newEffect);
+      onPreviewEffect(newEffect, duration);
+    }
+  };
+  
+  const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDuration = Math.max(1, parseInt(e.target.value) || 1);
+    setDuration(newDuration);
+    
+    if (isPreviewing) {
+      onPreviewEffect(effect, newDuration);
     }
   };
   
   const handleApply = () => {
-    onApplyEffect(effect, frameRange);
+    onApplyEffect(effect, frameRange, duration);
     setIsPreviewing(false);
     onPreviewEffect(null);
   };
@@ -140,7 +151,7 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
       onPreviewEffect(null);
       setIsPreviewing(false);
     } else {
-      onPreviewEffect(effect);
+      onPreviewEffect(effect, duration);
       setIsPreviewing(true);
     }
   };
@@ -305,6 +316,18 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
             />
           </div>
           
+          <div className="space-y-2">
+            <Label htmlFor="duration">Duration (seconds)</Label>
+            <Input
+              id="duration"
+              type="number"
+              min="1"
+              max="60"
+              value={duration}
+              onChange={handleDurationChange}
+            />
+          </div>
+          
           <div className="flex items-center space-x-2">
             <Checkbox 
               id="apply-all" 
@@ -318,7 +341,7 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
           
           {!applyToAllFrames && (
             <p className="text-xs text-animation-gray-500">
-              Effect will be applied to frame {selectedFrame + 1}
+              Effect will be applied to frame {selectedFrame + 1} for {duration} seconds
             </p>
           )}
         </div>

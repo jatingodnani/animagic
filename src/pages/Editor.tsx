@@ -21,9 +21,10 @@ const Editor = () => {
   const [selectedFrame, setSelectedFrame] = useState(0);
   const [previewEffect, setPreviewEffect] = useState<AnimationEffect | null>(null);
   const [frameRate] = useState(24);
+  const [animationDuration, setAnimationDuration] = useState(5); // Default 5 seconds
   const { toast } = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationCleanupRef = useRef<() => void | null>();
+  const animationCleanupRef = useRef<(() => void) | null>(null);
   
   // Handle video upload
   const handleVideoLoaded = (file: File, url: string) => {
@@ -47,7 +48,7 @@ const Editor = () => {
     // Clear any existing animation when changing frames
     if (animationCleanupRef.current) {
       animationCleanupRef.current();
-      animationCleanupRef.current = undefined;
+      animationCleanupRef.current = null;
     }
     
     // If there was an effect being previewed, restart it on the new frame
@@ -57,12 +58,15 @@ const Editor = () => {
   };
   
   // Apply animation effect to frames
-  const handleApplyEffect = (effect: AnimationEffect, frameRange: [number, number]) => {
+  const handleApplyEffect = (effect: AnimationEffect, frameRange: [number, number], duration: number) => {
+    // Update the animation duration
+    setAnimationDuration(duration);
+    
     // In a real implementation, this would actually modify the frames with the effect
     // For this demo, we'll just show a toast
     toast({
       title: "Effect applied",
-      description: `Applied ${effect.type} effect to frames ${frameRange[0] + 1} to ${frameRange[1] + 1}`,
+      description: `Applied ${effect.type} effect to frames ${frameRange[0] + 1} to ${frameRange[1] + 1} for ${duration} seconds`,
     });
     
     // Clear preview after applying
@@ -70,9 +74,14 @@ const Editor = () => {
   };
   
   // Preview effect on current frame
-  const handlePreviewEffect = (effect: AnimationEffect | null) => {
+  const handlePreviewEffect = (effect: AnimationEffect | null, duration?: number) => {
     // Clear existing animation
     stopPreviewAnimation();
+    
+    // Update duration if provided
+    if (duration !== undefined) {
+      setAnimationDuration(duration);
+    }
     
     // Set new effect and start preview if needed
     setPreviewEffect(effect);
@@ -93,7 +102,8 @@ const Editor = () => {
       animationCleanupRef.current = previewAnimation(
         canvasRef.current,
         frames[selectedFrame],
-        effect
+        effect,
+        animationDuration
       );
     } catch (error) {
       console.error("Error starting animation preview:", error);
@@ -109,7 +119,7 @@ const Editor = () => {
   const stopPreviewAnimation = () => {
     if (animationCleanupRef.current) {
       animationCleanupRef.current();
-      animationCleanupRef.current = undefined;
+      animationCleanupRef.current = null;
     }
   };
   
