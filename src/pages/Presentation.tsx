@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from 'react-router-dom';
-import { ArrowRight, Presentation, Gauge, Info, ArrowLeft } from 'lucide-react';
+import { ArrowRight, Gauge, Info, ArrowLeft } from 'lucide-react';
+import { Presentation as PresentationIcon } from 'lucide-react';
 import PerformanceMetrics from '@/components/presentation/PerformanceMetrics';
 import FeaturesOverview from '@/components/presentation/FeaturesOverview';
 import DemoMode from '@/components/presentation/DemoMode';
@@ -39,7 +40,7 @@ const Presentation: React.FC = () => {
             <Card className="col-span-1 hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Presentation className="h-5 w-5 text-animation-purple" />
+                  <PresentationIcon className="h-5 w-5 text-animation-purple" />
                   Demo Mode
                 </CardTitle>
                 <CardDescription>Show your project in action</CardDescription>
