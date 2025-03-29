@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Tabs, 
@@ -15,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { 
   RotateCw, 
   ZoomIn, 
-  Fade, 
+  Heart, 
   MoveHorizontal, 
   Wand2, 
   Play 
@@ -146,7 +145,7 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
       <Tabs defaultValue="fade" onValueChange={handleEffectTypeChange}>
         <TabsList className="grid grid-cols-4 mb-4">
           <TabsTrigger value="fade" className="flex items-center gap-1">
-            <Fade className="h-4 w-4" />
+            <Heart className="h-4 w-4" />
             <span className="hidden sm:inline">Fade</span>
           </TabsTrigger>
           <TabsTrigger value="zoom" className="flex items-center gap-1">
