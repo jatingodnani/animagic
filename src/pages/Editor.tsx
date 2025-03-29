@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { previewAnimation } from '@/utils/frameAnimationUtils';
 
 const Editor = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -21,6 +22,8 @@ const Editor = () => {
   const [previewEffect, setPreviewEffect] = useState<AnimationEffect | null>(null);
   const [frameRate] = useState(24);
   const { toast } = useToast();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationCleanupRef = useRef<() => void | null>();
   
   // Handle video upload
   const handleVideoLoaded = (file: File, url: string) => {
@@ -40,7 +43,17 @@ const Editor = () => {
   // Handle frame selection in timeline
   const handleFrameSelect = (index: number) => {
     setSelectedFrame(index);
-    setPreviewEffect(null);
+    
+    // Clear any existing animation when changing frames
+    if (animationCleanupRef.current) {
+      animationCleanupRef.current();
+      animationCleanupRef.current = undefined;
+    }
+    
+    // If there was an effect being previewed, restart it on the new frame
+    if (previewEffect && canvasRef.current && frames[index]) {
+      startPreviewAnimation(previewEffect);
+    }
   };
   
   // Apply animation effect to frames
@@ -51,13 +64,61 @@ const Editor = () => {
       title: "Effect applied",
       description: `Applied ${effect.type} effect to frames ${frameRange[0] + 1} to ${frameRange[1] + 1}`,
     });
-    setPreviewEffect(null);
+    
+    // Clear preview after applying
+    stopPreviewAnimation();
   };
   
   // Preview effect on current frame
   const handlePreviewEffect = (effect: AnimationEffect | null) => {
+    // Clear existing animation
+    stopPreviewAnimation();
+    
+    // Set new effect and start preview if needed
     setPreviewEffect(effect);
+    if (effect && canvasRef.current && frames[selectedFrame]) {
+      startPreviewAnimation(effect);
+    }
   };
+  
+  // Start animation preview
+  const startPreviewAnimation = (effect: AnimationEffect) => {
+    if (!canvasRef.current || !frames[selectedFrame]) return;
+    
+    try {
+      // Stop any existing animation
+      stopPreviewAnimation();
+      
+      // Start new animation and store cleanup function
+      animationCleanupRef.current = previewAnimation(
+        canvasRef.current,
+        frames[selectedFrame],
+        effect
+      );
+    } catch (error) {
+      console.error("Error starting animation preview:", error);
+      toast({
+        title: "Preview Error",
+        description: "There was an error previewing the animation effect.",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  // Stop animation preview
+  const stopPreviewAnimation = () => {
+    if (animationCleanupRef.current) {
+      animationCleanupRef.current();
+      animationCleanupRef.current = undefined;
+    }
+  };
+  
+  // Clean up animations when component unmounts
+  useEffect(() => {
+    return () => {
+      stopPreviewAnimation();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col editor-gradient">
@@ -97,13 +158,31 @@ const Editor = () => {
                     <TabsContent value="preview" className="space-y-4">
                       {frames.length > 0 && selectedFrame < frames.length ? (
                         <div className="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
-                          <div className={getPreviewClass(previewEffect)} style={getPreviewStyle(previewEffect)}>
+                          <canvas
+                            ref={canvasRef}
+                            className="max-h-full max-w-full"
+                          />
+                          {!previewEffect && frames[selectedFrame] && (
                             <img 
                               src={frames[selectedFrame]} 
                               alt={`Frame ${selectedFrame + 1}`}
-                              className="max-h-full max-w-full object-contain"
+                              className="max-h-full max-w-full object-contain absolute"
+                              onLoad={(e) => {
+                                // Once image loads, set canvas size to match
+                                if (canvasRef.current) {
+                                  const img = e.target as HTMLImageElement;
+                                  canvasRef.current.width = img.naturalWidth;
+                                  canvasRef.current.height = img.naturalHeight;
+                                  
+                                  // Draw initial frame on canvas
+                                  const ctx = canvasRef.current.getContext('2d');
+                                  if (ctx) {
+                                    ctx.drawImage(img, 0, 0);
+                                  }
+                                }
+                              }}
                             />
-                          </div>
+                          )}
                         </div>
                       ) : (
                         <div className="aspect-video bg-animation-gray-100 rounded-lg flex items-center justify-center">
@@ -183,79 +262,6 @@ const Editor = () => {
       <Footer />
     </div>
   );
-};
-
-// Helper function to get preview class based on the effect
-const getPreviewClass = (effect: AnimationEffect | null): string => {
-  if (!effect) return "";
-  
-  switch (effect.type) {
-    case "fade":
-      return effect.direction === "in" 
-        ? "animate-fade-in" 
-        : "animate-fade-out";
-      
-    case "zoom":
-      return effect.direction === "in"
-        ? "animate-scale-in"
-        : "animate-scale-out";
-      
-    case "rotate":
-      return "transition-transform";
-      
-    case "move":
-      switch (effect.direction) {
-        case "left":
-          return "animate-slide-in-right animate-reverse";
-        case "right":
-          return "animate-slide-in-right";
-        case "up":
-          return "animate-fade-in animate-reverse";
-        case "down":
-          return "animate-fade-in";
-        default:
-          return "";
-      }
-      
-    default:
-      return "";
-  }
-};
-
-// Helper function to get inline styles for the preview based on effect intensity
-const getPreviewStyle = (effect: AnimationEffect | null): React.CSSProperties => {
-  if (!effect) return {};
-  
-  const intensityFactor = effect.intensity / 100; // Normalize intensity (0-1)
-  
-  const style: React.CSSProperties = {};
-  
-  switch (effect.type) {
-    case "fade":
-      style.animationDuration = `${1.5 / intensityFactor}s`;
-      break;
-      
-    case "zoom":
-      style.animationDuration = `${1.5 / intensityFactor}s`;
-      break;
-      
-    case "rotate":
-      const rotationDeg = effect.direction === "clockwise" ? 360 : -360;
-      style.transform = `rotate(${rotationDeg * intensityFactor}deg)`;
-      style.transition = `transform ${1.5 / intensityFactor}s linear`;
-      style.animationIterationCount = "infinite";
-      break;
-      
-    case "move":
-      style.animationDuration = `${1.5 / intensityFactor}s`;
-      style.animationIterationCount = "infinite";
-      break;
-      
-    default:
-      break;
-  }
-  
-  return style;
 };
 
 export default Editor;
