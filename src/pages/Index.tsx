@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { 
   Zap, 
@@ -14,14 +14,24 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Testimonials from '@/components/Testimonials';
 import StatsCounter from '@/components/StatsCounter';
+import ScrollToTopButton from '@/components/ScrollToTopButton';
+import { scrollToSection } from '@/utils/scrollUtils';
 
 const Index = () => {
   const [animateHero, setAnimateHero] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     // Trigger animations after component mounts
     setAnimateHero(true);
-  }, []);
+    
+    // Handle scrolling to section when navigating from other pages
+    if (location.state && location.state.scrollToId) {
+      setTimeout(() => {
+        scrollToSection(location.state.scrollToId);
+      }, 100);
+    }
+  }, [location]);
 
   // Example animations
   const exampleAnimations = [
@@ -199,7 +209,7 @@ const Index = () => {
       </section>
       
       {/* Features */}
-      <section id="features" className="py-16 px-4 bg-animation-gray-100">
+      <section id="features" className="py-16 px-4 bg-animation-gray-100 scroll-mt-20">
         <div className="container max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-semibold mb-4 animate-fade-in">Powerful Animation Features</h2>
@@ -227,7 +237,7 @@ const Index = () => {
       <Testimonials />
       
       {/* How It Works */}
-      <section id="tutorial" className="py-16 px-4 bg-white">
+      <section id="tutorial" className="py-16 px-4 bg-white scroll-mt-20">
         <div className="container max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-semibold mb-4 animate-fade-in">How It Works</h2>
@@ -283,6 +293,7 @@ const Index = () => {
         </div>
       </section>
       
+      <ScrollToTopButton />
       <Footer />
     </div>
   );
