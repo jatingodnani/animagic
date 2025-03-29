@@ -219,8 +219,10 @@ export async function applyAnimationEffect(
         const posY = Math.random() * height;
         
         // Size based on progress - make sparkles grow and shrink
-        const sizeFactor = Math.sin((progress * Math.PI) + (i * 0.2));
-        const size = 2 + (sizeFactor * 5);
+        // FIX: Use Math.abs to make sure the size factor is always positive
+        const sizeFactor = Math.abs(Math.sin((progress * Math.PI) + (i * 0.2)));
+        // Ensure size is always positive and at least 1
+        const size = Math.max(1, 2 + (sizeFactor * 5));
         
         // Opacity based on progress and position
         ctx.globalAlpha = 0.6 * sizeFactor;
@@ -228,20 +230,30 @@ export async function applyAnimationEffect(
         // Draw a sparkle (small star)
         ctx.fillStyle = 'white';
         
-        // Draw a simple star
+        // FIX: Make sure radius is always positive
+        // Draw a simple star/circle
         ctx.beginPath();
-        ctx.arc(posX, posY, size, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Add a glow
-        const gradient = ctx.createRadialGradient(posX, posY, 0, posX, posY, size * 2);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(posX, posY, size * 2, 0, Math.PI * 2);
-        ctx.fill();
+        try {
+          // Only draw if size is positive
+          if (size > 0) {
+            ctx.arc(posX, posY, size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add a glow - ensure gradient radius is always positive
+            const gradientSize = Math.max(1, size * 2);
+            const gradient = ctx.createRadialGradient(posX, posY, 0, posX, posY, gradientSize);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(posX, posY, gradientSize, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } catch (error) {
+          console.error("Error drawing sparkle:", error);
+          // Silently continue with other sparkles
+        }
       }
       
       ctx.globalCompositeOperation = 'source-over';
@@ -378,6 +390,11 @@ export async function createAnimatedVideo(
   try {
     console.log(`Creating animated video for ${animationDurationInSeconds} seconds at ${fps} fps`);
     
+    // Check for VideoEncoder/VideoDecoder support
+    if (!('VideoEncoder' in window) || !('VideoDecoder' in window)) {
+      throw new Error('Web Codecs API is not supported in this browser. Please try using GIF format or a different browser.');
+    }
+    
     // Extract the target frame
     const extractedFrame = await extractFrame(videoFile, targetFrameIndex);
     
@@ -441,8 +458,13 @@ export function previewAnimation(
     // Clear canvas before drawing the next frame to prevent overlapping
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Apply the animation effect based on current progress
-    applyAnimationEffect(ctx, img, effect, progress);
+    try {
+      // Apply the animation effect based on current progress
+      applyAnimationEffect(ctx, img, effect, progress);
+    } catch (error) {
+      console.error("Error in animation frame:", error);
+      // Continue animation even if there's an error
+    }
     
     // Continue animation loop
     animationId = requestAnimationFrame(animate);

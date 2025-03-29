@@ -14,13 +14,18 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Download, Film, Settings, Info } from 'lucide-react';
+import { Download, Film, Settings, Info, AlertTriangle } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 
 interface VideoExporterProps {
   frames: string[];
@@ -44,6 +49,8 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
+  const [isMacOS, setIsMacOS] = useState(false);
+  const [hasWebCodecSupport, setHasWebCodecSupport] = useState(true);
   const [settings, setSettings] = useState<ExportSettings>({
     quality: "medium",
     format: "mp4",
@@ -58,6 +65,25 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
   });
   
   const { toast } = useToast();
+  
+  // Check platform and codec support
+  useEffect(() => {
+    // Check if user is on macOS
+    const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+    setIsMacOS(isMac);
+    
+    // Check for VideoEncoder support
+    const hasVideoEncoderSupport = typeof window !== 'undefined' && 'VideoEncoder' in window;
+    setHasWebCodecSupport(hasVideoEncoderSupport);
+    
+    // Adjust default format for Mac users
+    if (isMac && !hasVideoEncoderSupport) {
+      setSettings(prev => ({
+        ...prev,
+        format: "gif" // Default to GIF for Mac users without VideoEncoder
+      }));
+    }
+  }, []);
   
   // Calculate total frames based on duration and frame rate
   const getTotalFramesForAnimation = () => {
@@ -106,6 +132,20 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
     }));
   };
   
+  // Get available formats based on browser support
+  const getAvailableFormats = () => {
+    if (!hasWebCodecSupport) {
+      return ["gif"]; // Fallback to GIF if WebCodec not supported
+    }
+    
+    if (isMacOS) {
+      // Mac has better support for these formats
+      return ["mp4", "webm", "gif"];
+    }
+    
+    return ["mp4", "webm", "gif", "mov"];
+  };
+  
   const exportVideo = async () => {
     if (frames.length === 0) {
       toast({
@@ -137,6 +177,16 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       
       console.log(`Exporting video with ${totalFramesForAnimation} frames at ${settings.frameRate} fps for ${durationInSeconds} seconds`);
       console.log(`Quality settings: ${qualitySettings.width}x${qualitySettings.height} at ${qualitySettings.bitrate} bps`);
+      console.log(`Platform: ${isMacOS ? 'macOS' : 'Other'}, Format: ${settings.format}`);
+      
+      // Check compatibility issues
+      if (isMacOS && settings.format !== "gif" && !hasWebCodecSupport) {
+        toast({
+          title: "Compatibility Warning",
+          description: `Your Mac may not fully support ${settings.format.toUpperCase()} export. Consider using GIF format instead.`,
+          variant: "warning"
+        });
+      }
       
       // Simulate video export process
       let progress = 0;
@@ -161,7 +211,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
               description: `Your ${durationInSeconds}-second animated video has been exported as ${settings.format.toUpperCase()} with ${totalFramesForAnimation} frames.`,
             });
             
-            // Simulate download
+            // Simulate download with appropriate extension
             const a = document.createElement("a");
             a.href = "#";
             a.download = `animated-video-${durationInSeconds}s.${settings.format}`;
@@ -175,7 +225,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       setIsExporting(false);
       toast({
         title: "Export failed",
-        description: "An error occurred during export. Please try again.",
+        description: `An error occurred during export: ${error instanceof Error ? error.message : 'Unknown error'}. Please try a different format or quality.`,
         variant: "destructive"
       });
     }
@@ -222,6 +272,16 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
           </Button>
         </div>
       </div>
+      
+      {isMacOS && !hasWebCodecSupport && (
+        <Alert variant="warning" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Mac Compatibility Notice</AlertTitle>
+          <AlertDescription>
+            Some export formats might not be fully supported on macOS. We recommend using GIF format for best compatibility.
+          </AlertDescription>
+        </Alert>
+      )}
       
       {isExporting ? (
         <div className="space-y-2 my-4">
@@ -281,12 +341,19 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
                   <SelectValue placeholder="Select format" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mp4">MP4</SelectItem>
-                  <SelectItem value="webm">WebM</SelectItem>
-                  <SelectItem value="gif">GIF</SelectItem>
-                  <SelectItem value="mov">MOV</SelectItem>
+                  {getAvailableFormats().map(format => (
+                    <SelectItem key={format} value={format}>
+                      {format.toUpperCase()}
+                      {format === "gif" && isMacOS && " (Recommended)"}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              {isMacOS && settings.format !== "gif" && (
+                <p className="text-xs text-amber-500">
+                  Some Mac devices may have limited support for this format
+                </p>
+              )}
             </div>
           </div>
           
@@ -408,6 +475,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
           ? `${settings.customWidth}x${settings.customHeight}` 
           : `${getQualitySettings().width}x${getQualitySettings().height}`}
         </p>
+        <p>Export format: {settings.format.toUpperCase()}{isMacOS && settings.format === "gif" ? " (Best for Mac)" : ""}</p>
       </div>
     </div>
   );
