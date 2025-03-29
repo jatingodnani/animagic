@@ -2,12 +2,14 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Play, Pause, SkipForward } from 'lucide-react';
+import { Play, Pause, SkipForward, Film } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import AutoplayDemo from './AutoplayDemo';
 
 const DemoMode: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [showFullScreenDemo, setShowFullScreenDemo] = useState(false);
   
   const demoSteps = [
     {
@@ -49,6 +51,10 @@ const DemoMode: React.FC = () => {
     }
   };
   
+  const handleStartFullDemo = () => {
+    setShowFullScreenDemo(true);
+  };
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -78,6 +84,15 @@ const DemoMode: React.FC = () => {
           >
             <SkipForward className="h-4 w-4 mr-2" />
             Next
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            className="bg-animation-purple hover:bg-animation-purple/90"
+            onClick={handleStartFullDemo}
+          >
+            <Film className="h-4 w-4 mr-2" />
+            Full Demo
           </Button>
         </div>
       </div>
@@ -125,6 +140,10 @@ const DemoMode: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+      
+      {showFullScreenDemo && (
+        <AutoplayDemo onClose={() => setShowFullScreenDemo(false)} />
+      )}
     </div>
   );
 };
