@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -13,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Download, Film, Settings, Info, AlertTriangle } from 'lucide-react';
+import { Download, Film, Settings, Info, AlertTriangle, Music } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -42,6 +43,9 @@ interface ExportSettings {
   useCustomResolution: boolean;
   includeWatermark: boolean;
   compressionLevel: number;
+  includeAudio: boolean;
+  audioFile: File | null;
+  audioVolume: number;
 }
 
 const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 }) => {
@@ -60,9 +64,13 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
     customHeight: 1280,
     useCustomResolution: false,
     includeWatermark: false,
-    compressionLevel: 50
+    compressionLevel: 50,
+    includeAudio: false,
+    audioFile: null,
+    audioVolume: 80
   });
   
+  const audioInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
   useEffect(() => {
@@ -137,6 +145,52 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
     
     return ["mp4", "webm", "gif", "mov"];
   };
+
+  const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      // Check if file is an audio file
+      if (!file.type.startsWith('audio/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an audio file (.mp3, .wav, etc.)",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // File size check (10MB limit)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast({
+          title: "File too large",
+          description: "Audio file must be less than 10MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      handleSettingChange('audioFile', file);
+      handleSettingChange('includeAudio', true);
+      
+      toast({
+        title: "Audio added",
+        description: `${file.name} will be included in your export`,
+      });
+    }
+  };
+  
+  const removeAudio = () => {
+    handleSettingChange('audioFile', null);
+    handleSettingChange('includeAudio', false);
+    if (audioInputRef.current) {
+      audioInputRef.current.value = '';
+    }
+    toast({
+      title: "Audio removed",
+      description: "Your export will not include audio",
+    });
+  };
   
   const exportVideo = async () => {
     if (frames.length === 0) {
@@ -169,12 +223,19 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       console.log(`Exporting video with ${totalFramesForAnimation} frames at ${settings.frameRate} fps for ${durationInSeconds} seconds`);
       console.log(`Quality settings: ${qualitySettings.width}x${qualitySettings.height} at ${qualitySettings.bitrate} bps`);
       console.log(`Platform: ${isMacOS ? 'macOS' : 'Other'}, Format: ${settings.format}`);
+      console.log(`Audio included: ${settings.includeAudio}, Audio file: ${settings.audioFile?.name || 'None'}`);
       
       if (isMacOS && settings.format !== "gif" && !hasWebCodecSupport) {
         toast({
-          title: "Compatibility Warning",
+          title: "Compatibility Notice",
           description: `Your Mac may not fully support ${settings.format.toUpperCase()} export. Consider using GIF format instead.`,
-          variant: "warning"
+        });
+      }
+      
+      if (settings.includeAudio && settings.format === "gif") {
+        toast({
+          title: "Audio Notice",
+          description: "GIF format does not support audio. Your export will be silent.",
         });
       }
       
@@ -195,7 +256,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
             
             toast({
               title: "Export completed",
-              description: `Your ${durationInSeconds}-second animated video has been exported as ${settings.format.toUpperCase()} with ${totalFramesForAnimation} frames.`,
+              description: `Your ${durationInSeconds}-second animated video has been exported as ${settings.format.toUpperCase()} with ${totalFramesForAnimation} frames${settings.includeAudio ? ' and audio' : ''}.`,
             });
             
             const a = document.createElement("a");
@@ -274,6 +335,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
           <Progress value={exportProgress} className="h-2" />
           <p className="text-sm text-muted-foreground">
             Preparing your animation with {getTotalFramesForAnimation()} frames at {settings.quality} quality
+            {settings.includeAudio && " with audio"}
           </p>
         </div>
       ) : (
@@ -335,6 +397,99 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
                 <p className="text-xs text-amber-500">
                   Some Mac devices may have limited support for this format
                 </p>
+              )}
+            </div>
+          </div>
+          
+          {/* Audio Section */}
+          <div className="space-y-2 border-t pt-4 mt-2">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium flex items-center">
+                Audio Settings
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 ml-1 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Add background music to your animation</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </h4>
+              {settings.format === "gif" && (
+                <p className="text-xs text-amber-500">
+                  GIF format does not support audio
+                </p>
+              )}
+            </div>
+            
+            <div className="flex items-center space-x-2 mb-2">
+              <Checkbox
+                id="include-audio"
+                checked={settings.includeAudio}
+                disabled={settings.format === "gif" || !settings.audioFile}
+                onCheckedChange={(checked) => handleSettingChange('includeAudio', checked === true)}
+              />
+              <Label htmlFor="include-audio">
+                Include audio in export
+              </Label>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-2">
+              <div>
+                <input
+                  ref={audioInputRef}
+                  type="file"
+                  accept="audio/*"
+                  onChange={handleAudioFileChange}
+                  className="hidden"
+                  id="audio-file-input"
+                />
+                
+                {settings.audioFile ? (
+                  <div className="flex items-center justify-between bg-gray-50 p-2 rounded border">
+                    <div className="flex items-center space-x-2">
+                      <Music className="h-4 w-4 text-animation-purple" />
+                      <span className="text-sm truncate max-w-[200px]">{settings.audioFile.name}</span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={removeAudio}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => document.getElementById('audio-file-input')?.click()}
+                  >
+                    <Music className="mr-2 h-4 w-4" />
+                    Add Audio File
+                  </Button>
+                )}
+              </div>
+              
+              {settings.audioFile && (
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Label htmlFor="audio-volume">Audio Volume</Label>
+                    <span className="text-sm text-animation-gray-500">
+                      {settings.audioVolume}%
+                    </span>
+                  </div>
+                  <Slider
+                    id="audio-volume"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={[settings.audioVolume]}
+                    onValueChange={(value) => handleSettingChange('audioVolume', value[0])}
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -458,6 +613,9 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
           : `${getQualitySettings().width}x${getQualitySettings().height}`}
         </p>
         <p>Export format: {settings.format.toUpperCase()}{isMacOS && settings.format === "gif" ? " (Best for Mac)" : ""}</p>
+        {settings.includeAudio && settings.audioFile && (
+          <p>Audio: {settings.audioFile.name} ({(settings.audioFile.size / (1024 * 1024)).toFixed(2)}MB) at {settings.audioVolume}% volume</p>
+        )}
       </div>
     </div>
   );
