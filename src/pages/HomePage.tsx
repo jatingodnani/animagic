@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -197,8 +198,8 @@ const HomePage = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="relative">
-              <div className="absolute -left-4 top-0 w-8 h-8 rounded-full bg-animation-purple text-white flex items-center justify-center font-bold">1</div>
+            <div className="relative pl-10 md:pl-0 md:pt-10">
+              <div className="absolute -left-4 top-0 md:left-0 md:-top-4 w-8 h-8 rounded-full bg-animation-purple text-white flex items-center justify-center font-bold">1</div>
               <AnimatedFeatureCard
                 title="Upload Your Video"
                 description="Start by uploading the video you want to animate. We support most popular video formats."
@@ -209,8 +210,8 @@ const HomePage = () => {
               />
             </div>
             
-            <div className="relative">
-              <div className="absolute -left-4 top-0 w-8 h-8 rounded-full bg-animation-purple text-white flex items-center justify-center font-bold">2</div>
+            <div className="relative pl-10 md:pl-0 md:pt-10">
+              <div className="absolute -left-4 top-0 md:left-0 md:-top-4 w-8 h-8 rounded-full bg-animation-purple text-white flex items-center justify-center font-bold">2</div>
               <AnimatedFeatureCard
                 title="Apply Animations"
                 description="Choose from our library of animations and effects to transform your video."
@@ -221,8 +222,8 @@ const HomePage = () => {
               />
             </div>
             
-            <div className="relative">
-              <div className="absolute -left-4 top-0 w-8 h-8 rounded-full bg-animation-purple text-white flex items-center justify-center font-bold">3</div>
+            <div className="relative pl-10 md:pl-0 md:pt-10">
+              <div className="absolute -left-4 top-0 md:left-0 md:-top-4 w-8 h-8 rounded-full bg-animation-purple text-white flex items-center justify-center font-bold">3</div>
               <AnimatedFeatureCard
                 title="Export & Share"
                 description="Export your animated video in high quality and share it with the world."
