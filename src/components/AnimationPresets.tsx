@@ -2,6 +2,14 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { X, Sparkles, ZoomIn, Heart, RotateCw, MoveHorizontal, Droplets, Palette } from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export interface PresetType {
   id: string;
@@ -151,7 +159,7 @@ const getIconForPreset = (preset: PresetType) => {
 
 const AnimationPresets: React.FC<AnimationPresetsProps> = ({ onSelectPreset, onClose }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-h-[70vh] overflow-y-auto">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-animation-purple" />
@@ -164,23 +172,24 @@ const AnimationPresets: React.FC<AnimationPresetsProps> = ({ onSelectPreset, onC
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {presets.map((preset) => (
-          <Button
-            key={preset.id}
-            variant="outline"
-            className="flex items-start justify-start h-auto p-3 text-left"
+          <Card 
+            key={preset.id} 
+            className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200"
             onClick={() => onSelectPreset(preset)}
           >
-            <div className="flex flex-col items-start">
-              <div className="flex items-center gap-2 mb-1">
-                {getIconForPreset(preset)}
-                <span className="font-medium">{preset.name}</span>
+            <CardContent className="p-3">
+              <div className="flex flex-col items-start">
+                <div className="flex items-center gap-2 mb-1">
+                  {getIconForPreset(preset)}
+                  <span className="font-medium truncate">{preset.name}</span>
+                </div>
+                <p className="text-xs text-muted-foreground line-clamp-2">{preset.description}</p>
+                <div className="mt-1 text-xs text-animation-gray-500">
+                  {preset.duration}s • {preset.intensity}% intensity
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">{preset.description}</p>
-              <div className="mt-1 text-xs text-animation-gray-500">
-                {preset.duration}s • {preset.intensity}% intensity
-              </div>
-            </div>
-          </Button>
+            </CardContent>
+          </Card>
         ))}
       </div>
       
