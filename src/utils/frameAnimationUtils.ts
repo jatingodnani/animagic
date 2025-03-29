@@ -31,7 +31,6 @@ export async function extractFrame(videoFile: File, targetFrameIndex: number): P
     
     try {
       // Try to determine codec, default to VP8
-      // In a real app, you'd need more sophisticated codec detection
       const codecString = 'vp8';
       
       decoder.configure({
@@ -65,70 +64,86 @@ export async function applyAnimationEffect(
   // Save the canvas state
   ctx.save();
   
-  // Clear the canvas
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  
   // Get frame dimensions
   const width = frame instanceof VideoFrame ? frame.displayWidth : frame.width;
   const height = frame instanceof VideoFrame ? frame.displayHeight : frame.height;
   
-  // Normalize intensity to 0-1
-  const intensity = effect.intensity / 100;
+  // Clear the canvas
+  ctx.clearRect(0, 0, width, height);
+  
+  // Normalize intensity to a useful range (0.1-2)
+  const normalizedIntensity = effect.intensity / 50;
   
   // Apply different effects based on the type
   switch (effect.type) {
     case 'fade':
       if (effect.direction === 'in') {
-        ctx.globalAlpha = progress * intensity;
+        ctx.globalAlpha = progress;
       } else { // 'out'
-        ctx.globalAlpha = (1 - progress) * intensity;
+        ctx.globalAlpha = 1 - progress;
       }
       ctx.drawImage(frame, 0, 0, width, height);
       break;
       
     case 'zoom':
-      const zoomFactor = effect.direction === 'in' 
-        ? 1 + (progress * intensity)
-        : 2 - (progress * intensity);
+      const zoomCenter = width / 2;
+      const zoomCenterY = height / 2;
       
-      // Center the zoom
-      ctx.translate(width / 2, height / 2);
-      ctx.scale(zoomFactor, zoomFactor);
-      ctx.translate(-width / 2, -height / 2);
-      
+      if (effect.direction === 'in') {
+        // Start small and grow
+        const scale = 1 + (progress * normalizedIntensity);
+        const offsetX = (width - width * scale) / 2;
+        const offsetY = (height - height * scale) / 2;
+        
+        ctx.translate(zoomCenter, zoomCenterY);
+        ctx.scale(scale, scale);
+        ctx.translate(-zoomCenter, -zoomCenterY);
+      } else { // 'out'
+        // Start large and shrink
+        const scale = 1 + (normalizedIntensity - (progress * normalizedIntensity));
+        const offsetX = (width - width * scale) / 2;
+        const offsetY = (height - height * scale) / 2;
+        
+        ctx.translate(zoomCenter, zoomCenterY);
+        ctx.scale(scale, scale);
+        ctx.translate(-zoomCenter, -zoomCenterY);
+      }
       ctx.drawImage(frame, 0, 0, width, height);
       break;
       
     case 'rotate':
-      // Get rotation angle based on direction and progress
-      const angleMultiplier = effect.direction === 'clockwise' ? 1 : -1;
-      const maxRotation = 360 * intensity; // Max rotation based on intensity
-      const currentAngle = progress * maxRotation * angleMultiplier;
+      const centerX = width / 2;
+      const centerY = height / 2;
       
-      // Set rotation center
-      ctx.translate(width / 2, height / 2);
-      ctx.rotate((currentAngle * Math.PI) / 180);
-      ctx.translate(-width / 2, -height / 2);
+      ctx.translate(centerX, centerY);
       
+      if (effect.direction === 'clockwise') {
+        ctx.rotate(progress * normalizedIntensity * Math.PI * 2);
+      } else { // 'counterclockwise'
+        ctx.rotate(-progress * normalizedIntensity * Math.PI * 2);
+      }
+      
+      ctx.translate(-centerX, -centerY);
       ctx.drawImage(frame, 0, 0, width, height);
       break;
       
     case 'move':
       let xOffset = 0;
       let yOffset = 0;
+      const moveAmount = width * normalizedIntensity; // Use width for horizontal, height for vertical
       
       switch(effect.direction) {
         case 'left':
-          xOffset = (1 - progress) * width * intensity;
+          xOffset = (1 - progress) * moveAmount;
           break;
         case 'right':
-          xOffset = (progress - 1) * width * intensity;
+          xOffset = (progress - 1) * moveAmount;
           break;
         case 'up':
-          yOffset = (1 - progress) * height * intensity;
+          yOffset = (1 - progress) * moveAmount;
           break;
         case 'down':
-          yOffset = (progress - 1) * height * intensity;
+          yOffset = (progress - 1) * moveAmount;
           break;
       }
       
@@ -186,7 +201,7 @@ export async function animateFrame(
 }
 
 // Step 3: Encode frames to video
-export async function encodeFrames(frames: VideoFrame[]): Promise<EncodedVideoChunk[]> {
+export async function encodeFrames(frames: VideoFrame[]): Promise<ArrayBuffer> {
   if (frames.length === 0) {
     throw new Error('No frames to encode');
   }
@@ -199,7 +214,6 @@ export async function encodeFrames(frames: VideoFrame[]): Promise<EncodedVideoCh
   return new Promise((resolve, reject) => {
     const chunks: EncodedVideoChunk[] = [];
     
-    // Fixed: removed 'complete' from the encoder initialization
     const encoder = new VideoEncoder({
       output: (chunk) => {
         chunks.push(chunk);
@@ -216,44 +230,35 @@ export async function encodeFrames(frames: VideoFrame[]): Promise<EncodedVideoCh
         framerate: 30
       });
       
-      frames.forEach(frame => {
-        encoder.encode(frame);
+      // Encode each frame
+      frames.forEach((frame, index) => {
+        const isKeyFrame = index % 30 === 0; // Key frame every 30 frames
+        encoder.encode(frame, { keyFrame: isKeyFrame });
         frame.close(); // Release frame after encoding
       });
       
-      // When flushing completes, the promise will resolve with chunks
-      encoder.flush().then(() => resolve(chunks));
+      // When flushing completes, process the chunks and resolve
+      encoder.flush().then(() => {
+        // Create a single buffer from all chunks
+        const totalSize = chunks.reduce((size, chunk) => size + chunk.byteLength, 0);
+        const buffer = new ArrayBuffer(totalSize);
+        const view = new Uint8Array(buffer);
+        
+        let offset = 0;
+        chunks.forEach(chunk => {
+          // Copy chunk data to the buffer
+          const chunkData = new Uint8Array(chunk.byteLength);
+          chunk.copyTo(chunkData);
+          view.set(chunkData, offset);
+          offset += chunk.byteLength;
+        });
+        
+        resolve(buffer);
+      });
     } catch (error) {
       reject(error);
     }
   });
-}
-
-// Helper function to combine encoded chunks into a video
-export function concatenateChunks(chunks: EncodedVideoChunk[]): ArrayBuffer {
-  // This is a simplified version
-  // In a real app, you'd need to create a proper WebM container
-  
-  let totalSize = 0;
-  chunks.forEach(chunk => {
-    // We need to access the data, which might require a different approach
-    // This is a simplification and might not work directly
-    totalSize += chunk.byteLength;
-  });
-  
-  const result = new Uint8Array(totalSize);
-  let offset = 0;
-  
-  chunks.forEach(chunk => {
-    // Note: In real implementation, you need proper access to chunk data
-    // This might require converting the chunk to a different format
-    const data = new Uint8Array(chunk.byteLength);
-    // Copy chunk data to the data array (simplified)
-    result.set(data, offset);
-    offset += chunk.byteLength;
-  });
-  
-  return result.buffer;
 }
 
 // Main function to create animated video from a single frame
@@ -279,10 +284,7 @@ export async function createAnimatedVideo(
     extractedFrame.close();
     
     // Encode the animated frames into a video
-    const encodedChunks = await encodeFrames(animatedFrames);
-    
-    // Combine the chunks into a video file
-    const videoBuffer = concatenateChunks(encodedChunks);
+    const videoBuffer = await encodeFrames(animatedFrames);
     
     // Return as a downloadable Blob
     return new Blob([videoBuffer], {type: 'video/webm'});
@@ -313,7 +315,7 @@ export function previewAnimation(
   
   // Animation parameters
   const fps = 60;
-  const duration = 1.5; // seconds
+  const duration = 2; // seconds
   const totalFrames = duration * fps;
   let frameCount = 0;
   let animationId: number;
@@ -328,7 +330,7 @@ export function previewAnimation(
     applyAnimationEffect(ctx, img, effect, progress);
     
     // Increment frame counter and request next frame
-    frameCount++;
+    frameCount = (frameCount + 1) % totalFrames;
     animationId = requestAnimationFrame(animate);
   };
   
