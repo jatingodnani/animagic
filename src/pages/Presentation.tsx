@@ -18,7 +18,8 @@ const Presentation: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative">
-      <AnimatedBackground className="opacity-30" />
+      {/* Fix: Remove the className prop from AnimatedBackground since it doesn't accept it */}
+      <AnimatedBackground />
       <FloatingShapes count={8} className="opacity-20" />
       
       <Navbar />
