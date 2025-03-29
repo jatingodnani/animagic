@@ -267,14 +267,14 @@ const VideoExporter: React.FC<VideoExporterProps> = ({
   
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100 w-full">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-3 mb-4">
         <h3 className="text-base md:text-lg font-medium">Export Animation</h3>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
-            className="w-full sm:w-auto"
+            className="flex-grow sm:flex-grow-0"
           >
             <Settings className="h-4 w-4 mr-1" />
             {showAdvancedSettings ? "Basic Settings" : "Advanced Settings"}
@@ -282,7 +282,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({
           <Button
             onClick={exportVideo}
             disabled={isExporting || frames.length === 0}
-            className="bg-animation-purple hover:bg-animation-purple/90 w-full sm:w-auto"
+            className="bg-animation-purple hover:bg-animation-purple/90 flex-grow sm:flex-grow-0"
           >
             {isExporting ? "Exporting..." : "Export Video"}
             <Download className="ml-2 h-4 w-4" />
