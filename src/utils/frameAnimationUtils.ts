@@ -199,12 +199,12 @@ export async function encodeFrames(frames: VideoFrame[]): Promise<EncodedVideoCh
   return new Promise((resolve, reject) => {
     const chunks: EncodedVideoChunk[] = [];
     
+    // Fixed: removed 'complete' from the encoder initialization
     const encoder = new VideoEncoder({
       output: (chunk) => {
         chunks.push(chunk);
       },
-      error: (e) => reject(e),
-      complete: () => resolve(chunks)
+      error: (e) => reject(e)
     });
     
     try {
@@ -221,7 +221,8 @@ export async function encodeFrames(frames: VideoFrame[]): Promise<EncodedVideoCh
         frame.close(); // Release frame after encoding
       });
       
-      encoder.flush();
+      // When flushing completes, the promise will resolve with chunks
+      encoder.flush().then(() => resolve(chunks));
     } catch (error) {
       reject(error);
     }
