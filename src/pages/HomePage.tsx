@@ -244,29 +244,63 @@ const HomePage = () => {
       </section>
       
       {/* Call to action */}
-      <section className="py-20 bg-animation-purple text-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <AnimatedText
-              text="Ready to Transform Your Videos?"
-              className="text-3xl md:text-4xl font-bold mb-6 text-white"
-              delay={100}
-              highlightColor="bg-white/20"
-            />
-            
-            <p className="text-white/80 mb-8 text-lg">
-              Join thousands of creators who use AniMagic to bring their videos to life with stunning animations.
-            </p>
-            
-            <Link to="/editor">
-              <Button 
-                size="lg" 
-                className="bg-white text-animation-purple hover:bg-white/90 px-8"
-              >
-                Start Creating Now
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-animation-purple/90 to-animation-purple/70 overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 animate-pulse-slow"></div>
+          <div className="absolute -bottom-32 -left-32 w-64 h-64 rounded-full bg-white/5 animate-reverse-spin-slow"></div>
+          
+          {[...Array(12)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute bg-white/20 rounded-full animate-float-random"
+              style={{
+                width: 6 + Math.random() * 12 + 'px',
+                height: 6 + Math.random() * 12 + 'px',
+                top: Math.random() * 100 + '%',
+                left: Math.random() * 100 + '%',
+                animationDuration: 15 + Math.random() * 20 + 's',
+                animationDelay: Math.random() * 5 + 's',
+              }}
+            ></div>
+          ))}
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-2xl border border-white/20 overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-lg"></div>
+              <div className="absolute bottom-0 right-0 w-40 h-40 bg-white/5 rounded-full translate-x-1/2 translate-y-1/2 blur-lg"></div>
+              
+              <div className="text-center">
+                <AnimatedText
+                  text="Ready to Transform Your Videos?"
+                  className="text-3xl md:text-4xl font-bold text-white mb-6"
+                  delay={100}
+                  highlightColor="bg-white/20"
+                />
+                
+                <p className="text-white/90 mb-8 text-lg max-w-2xl mx-auto leading-relaxed">
+                  Join thousands of creators who use AniMagic to bring their videos to life with stunning animations. Start creating professional-quality animations today.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link to="/editor">
+                    <Button 
+                      size="lg" 
+                      className="relative overflow-hidden group bg-white text-animation-purple hover:bg-white/90 px-10 py-6 shadow-glow"
+                    >
+                      <span className="relative z-10 text-lg font-medium">Start Creating Now</span>
+                      <span className="absolute inset-0 bg-animation-purple/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                      <ArrowRight className="ml-2 h-5 w-5 relative z-10 transition-transform group-hover:translate-x-1" />
+                    </Button>
+                  </Link>
+                </div>
+                
+                <div className="mt-6 text-white/80 text-sm">
+                  No credit card required. Start with our free plan.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

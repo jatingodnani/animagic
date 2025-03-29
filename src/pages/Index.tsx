@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -29,25 +28,20 @@ const Index = () => {
   const bgParticlesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Trigger animations after component mounts
     setAnimateHero(true);
     
-    // Handle scrolling to section when navigating from other pages
     if (location.state && location.state.scrollToId) {
       setTimeout(() => {
         scrollToSection(location.state.scrollToId);
       }, 100);
     }
     
-    // Set up scroll triggered animations
     setupScrollAnimations();
     setupParallaxEffect();
     
-    // Track scroll position for parallax effects
     const handleScroll = () => {
       setScrollPosition(window.scrollY);
       
-      // Animate background particles on scroll
       if (bgParticlesRef.current) {
         const particles = bgParticlesRef.current.querySelectorAll('.bg-particle');
         particles.forEach((particle, index) => {
@@ -61,21 +55,17 @@ const Index = () => {
     
     window.addEventListener('scroll', handleScroll);
     
-    // Create animated background particles
     const createParticles = () => {
       if (!bgParticlesRef.current) return;
       
-      // Clear existing particles
       while (bgParticlesRef.current.firstChild) {
         bgParticlesRef.current.removeChild(bgParticlesRef.current.firstChild);
       }
       
-      // Create new particles
       for (let i = 0; i < 30; i++) {
         const particle = document.createElement('div');
         particle.classList.add('bg-particle');
         
-        // Randomize particle properties
         const size = 5 + Math.random() * 20;
         const opacity = 0.03 + Math.random() * 0.07;
         const top = Math.random() * 100;
@@ -83,7 +73,6 @@ const Index = () => {
         const delay = Math.random() * 5;
         const duration = 15 + Math.random() * 30;
         
-        // Apply styles
         particle.style.width = `${size}px`;
         particle.style.height = `${size}px`;
         particle.style.top = `${top}vh`;
@@ -103,7 +92,6 @@ const Index = () => {
     };
   }, [location]);
 
-  // Example animations
   const exampleAnimations = [
     {
       id: 1,
@@ -127,8 +115,7 @@ const Index = () => {
       icon: <MoveVertical className="h-8 w-8 text-white" />
     }
   ];
-  
-  // Features
+
   const features = [
     {
       icon: <UploadCloud className="h-6 w-6 text-animation-purple" />,
@@ -151,8 +138,7 @@ const Index = () => {
       description: "Export your animations in multiple formats and quality settings for any platform."
     }
   ];
-  
-  // Tutorial steps
+
   const tutorialSteps = [
     {
       number: "01",
@@ -180,10 +166,8 @@ const Index = () => {
     <div className="min-h-screen flex flex-col overflow-hidden relative">
       <Navbar />
       
-      {/* Background animated particles */}
       <div ref={bgParticlesRef} className="fixed inset-0 z-0 pointer-events-none overflow-hidden"></div>
       
-      {/* Hero Section */}
       <section className="hero-gradient py-20 px-4 md:py-32 overflow-hidden relative z-10">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-animation-purple/20 animate-pulse-purple"></div>
@@ -229,7 +213,6 @@ const Index = () => {
                   </div>
                 </div>
                 
-                {/* Floating elements around the main image */}
                 <div className="absolute top-[20%] -right-10 w-14 h-14 bg-animation-purple/80 backdrop-blur-md rounded-lg animate-float stagger-1 flex items-center justify-center">
                   <Wand2 className="text-white h-8 w-8" />
                 </div>
@@ -247,7 +230,6 @@ const Index = () => {
                 />
               </div>
               
-              {/* Animated path lines */}
               <svg className="absolute -top-10 -right-10 w-32 h-32 text-animation-purple/30 animate-pulse" viewBox="0 0 100 100">
                 <path d="M10,30 Q50,10 80,50 T90,90" fill="none" stroke="currentColor" strokeWidth="2" className="animate-draw-path" />
               </svg>
@@ -259,7 +241,6 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Animated wave */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="text-white">
             <path fill="currentColor" fillOpacity="1" d="M0,128L48,133.3C96,139,192,149,288,144C384,139,480,117,576,122.7C672,128,768,160,864,165.3C960,171,1056,149,1152,128C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -267,10 +248,8 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Stats Counter Section */}
       <StatsCounter />
       
-      {/* Example Animations */}
       <section className="py-16 px-4 bg-white relative z-10">
         <div className="container max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -305,7 +284,6 @@ const Index = () => {
                     </div>
                   </div>
                   
-                  {/* Add floating icon */}
                   <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform -translate-y-2 group-hover:translate-y-0">
                     {animation.icon}
                   </div>
@@ -325,7 +303,6 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Features */}
       <section id="features" className="py-16 px-4 bg-animation-gray-100 scroll-mt-20 relative z-10">
         <div className="container max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -349,15 +326,12 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Background decoration */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-animation-purple/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-animation-purple/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
       </section>
       
-      {/* Testimonials Section */}
       <Testimonials />
       
-      {/* How It Works */}
       <section id="tutorial" className="py-16 px-4 bg-white scroll-mt-20 relative z-10">
         <div className="container max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -382,7 +356,6 @@ const Index = () => {
                   <div className="hidden lg:block absolute top-6 left-full w-12 h-0.5 bg-animation-purple/20 -translate-x-6"></div>
                 )}
                 
-                {/* Animated step number */}
                 <div className="absolute -left-4 -top-4 w-12 h-12 rounded-full flex items-center justify-center bg-animation-purple text-white font-bold text-lg animate-pulse-border">
                   {index + 1}
                 </div>
@@ -401,43 +374,87 @@ const Index = () => {
         </div>
       </section>
       
-      {/* CTA Section */}
-      <section className="py-16 px-4 hero-gradient relative overflow-hidden z-10">
-        <div className="absolute inset-0 bg-animation-purple/10 animate-pulse opacity-30"></div>
-        <div className="container max-w-7xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 animate-on-scroll animate-slide-up" data-delay="100">
-            Ready to Create Amazing Animations?
-          </h2>
-          <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto animate-on-scroll animate-slide-up" data-delay="200">
-            Join thousands of creators who use our platform to bring their videos to life with stunning animations.
-          </p>
-          <div className="animate-on-scroll animate-slide-up" data-delay="300">
-            <Link to="/editor">
-              <Button className="bg-white text-animation-purple hover:bg-white/90 shadow-lg transform transition-transform hover:scale-105 duration-300 group relative overflow-hidden">
-                <span className="relative z-10">Start Editing Now</span>
-                <span className="absolute inset-0 bg-animation-purple/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
-                <ChevronRight className="ml-2 h-4 w-4 animate-bounce relative z-10" />
-              </Button>
-            </Link>
-          </div>
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-animation-purple via-animation-purple/90 to-animation-purple/80 overflow-hidden">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-white/10 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-white/5 blur-2xl"></div>
+          
+          <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5"></path>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid-pattern)"></rect>
+          </svg>
+          
+          {[...Array(15)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute bg-white/30 rounded-full"
+              style={{
+                width: 4 + Math.random() * 8 + 'px',
+                height: 4 + Math.random() * 8 + 'px',
+                top: Math.random() * 100 + '%',
+                left: Math.random() * 100 + '%',
+                opacity: 0.1 + Math.random() * 0.3,
+                animationDuration: 10 + Math.random() * 20 + 's',
+                animationDelay: Math.random() * 5 + 's',
+                filter: 'blur(' + Math.random() * 2 + 'px)'
+              }}
+            ></div>
+          ))}
         </div>
         
-        {/* Animated particles */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[...Array(20)].map((_, index) => (
-            <div 
-              key={index}
-              className="absolute rounded-full bg-white/30"
-              style={{
-                width: 5 + Math.random() * 10 + 'px',
-                height: 5 + Math.random() * 10 + 'px',
-                top: Math.random() * 100 + 'vh',
-                left: Math.random() * 100 + 'vw',
-                animationDuration: 3 + Math.random() * 10 + 's',
-                animationDelay: Math.random() * 5 + 's'
-              }}
-            />
-          ))}
+        <div className="container max-w-7xl mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto">
+            <div className="backdrop-blur-sm rounded-xl p-8 md:p-12 shadow-2xl overflow-hidden relative border border-white/10">
+              <div className="text-center">
+                <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 animate-on-scroll animate-slide-up" data-delay="100">
+                  Ready to <span className="relative z-10">Transform Your Videos?
+                    <span className="absolute bottom-2 left-0 w-full h-2 bg-white/20 -z-10 transform origin-left"></span>
+                  </span>
+                </h2>
+                
+                <p className="text-white/90 text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed animate-on-scroll animate-slide-up" data-delay="200">
+                  Join thousands of creators who use our platform to bring their videos to life with stunning animations and effects.
+                </p>
+                
+                <div className="flex flex-wrap gap-6 justify-center animate-on-scroll animate-slide-up" data-delay="300">
+                  <Link to="/editor">
+                    <Button className="bg-white text-animation-purple hover:bg-white/90 text-lg py-6 px-10 shadow-xl border border-white/20 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group relative overflow-hidden">
+                      <span className="relative z-10">Start Creating Now</span>
+                      <span className="absolute inset-0 bg-animation-purple/10 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-bottom"></span>
+                      <ChevronRight className="ml-2 h-5 w-5 animate-bounce relative z-10" />
+                    </Button>
+                  </Link>
+                </div>
+                
+                <div className="mt-8 flex flex-col sm:flex-row gap-8 justify-center text-white/80 animate-on-scroll animate-slide-up" data-delay="400">
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="h-5 w-5 text-white/60" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
+                    </svg>
+                    <span>No credit card required</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="h-5 w-5 text-white/60" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
+                    </svg>
+                    <span>Free starter plan available</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="h-5 w-5 text-white/60" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
+                    </svg>
+                    <span>Cancel anytime</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       
@@ -448,4 +465,3 @@ const Index = () => {
 };
 
 export default Index;
-
