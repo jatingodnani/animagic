@@ -97,7 +97,7 @@ const Editor = () => {
                     <TabsContent value="preview" className="space-y-4">
                       {frames.length > 0 && selectedFrame < frames.length ? (
                         <div className="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
-                          <div className={`relative ${getPreviewClass(previewEffect)}`}>
+                          <div className={`relative ${getPreviewClass(previewEffect)}`} style={getPreviewStyle(previewEffect)}>
                             <img 
                               src={frames[selectedFrame]} 
                               alt={`Frame ${selectedFrame + 1}`}
@@ -189,32 +189,34 @@ const Editor = () => {
 const getPreviewClass = (effect: AnimationEffect | null): string => {
   if (!effect) return "";
   
+  const durationClass = "duration-1000";
+  
   switch (effect.type) {
     case "fade":
       return effect.direction === "in" 
-        ? "animate-[fade-in_1s_ease-out_infinite]" 
-        : "animate-[fade-out_1s_ease-out_infinite]";
+        ? "animate-fade-in" 
+        : "animate-fade-out";
       
     case "zoom":
       return effect.direction === "in"
-        ? "animate-[scale-in_1s_ease-out_infinite]"
-        : "animate-[scale-out_1s_ease-out_infinite]";
+        ? "animate-scale-in"
+        : "animate-scale-out";
       
     case "rotate":
       return effect.direction === "clockwise"
-        ? "animate-[spin_2s_linear_infinite]"
+        ? "animate-spin"
         : "animate-[spin_2s_linear_infinite_reverse]";
       
     case "move":
       switch (effect.direction) {
         case "left":
-          return "animate-[slide-left_1s_ease-out_infinite]";
+          return "animate-[slide-in-right_1s_ease-out_infinite_reverse]";
         case "right":
-          return "animate-[slide-right_1s_ease-out_infinite]";
+          return "animate-[slide-in-right_1s_ease-out_infinite]";
         case "up":
-          return "animate-[slide-up_1s_ease-out_infinite]";
+          return "translate-y-full animate-[fade-in_1s_ease-out_infinite_reverse]";
         case "down":
-          return "animate-[slide-down_1s_ease-out_infinite]";
+          return "translate-y-[-100%] animate-[fade-in_1s_ease-out_infinite]";
         default:
           return "";
       }
@@ -222,6 +224,19 @@ const getPreviewClass = (effect: AnimationEffect | null): string => {
     default:
       return "";
   }
+};
+
+// Helper function to get inline styles for the preview based on effect intensity
+const getPreviewStyle = (effect: AnimationEffect | null): React.CSSProperties => {
+  if (!effect) return {};
+  
+  const intensityFactor = effect.intensity / 50; // Normalize intensity
+  
+  const style: React.CSSProperties = {
+    animationDuration: `${2 / intensityFactor}s`,
+  };
+  
+  return style;
 };
 
 export default Editor;

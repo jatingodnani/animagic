@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Tabs, 
@@ -17,7 +18,8 @@ import {
   Heart, 
   MoveHorizontal, 
   Wand2, 
-  Play 
+  Play,
+  Pause
 } from 'lucide-react';
 
 interface AnimationToolsProps {
@@ -46,6 +48,7 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
   });
   const [frameRange, setFrameRange] = useState<[number, number]>([selectedFrame, selectedFrame]);
   const [applyToAllFrames, setApplyToAllFrames] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   
   // Update frame range when selected frame changes
   useEffect(() => {
@@ -62,6 +65,13 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
       setFrameRange([selectedFrame, selectedFrame]);
     }
   }, [applyToAllFrames, selectedFrame, totalFrames]);
+  
+  // Clear preview effect when component unmounts
+  useEffect(() => {
+    return () => {
+      onPreviewEffect(null);
+    };
+  }, [onPreviewEffect]);
   
   const handleEffectTypeChange = (type: string) => {
     let newDirection = effect.direction;
@@ -87,6 +97,15 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
       type: type as AnimationEffect['type'],
       direction: newDirection as AnimationEffect['direction']
     });
+    
+    // Update preview if it's active
+    if (isPreviewing) {
+      onPreviewEffect({
+        type: type as AnimationEffect['type'],
+        intensity: effect.intensity,
+        direction: newDirection as AnimationEffect['direction']
+      });
+    }
   };
   
   const handleDirectionChange = (direction: string) => {
@@ -94,6 +113,14 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
       ...effect,
       direction: direction as AnimationEffect['direction']
     });
+    
+    // Update preview if it's active
+    if (isPreviewing) {
+      onPreviewEffect({
+        ...effect,
+        direction: direction as AnimationEffect['direction']
+      });
+    }
   };
   
   const handleIntensityChange = (value: number[]) => {
@@ -101,18 +128,29 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
       ...effect,
       intensity: value[0]
     });
+    
+    // Update preview if it's active
+    if (isPreviewing) {
+      onPreviewEffect({
+        ...effect,
+        intensity: value[0]
+      });
+    }
   };
   
   const handleApply = () => {
     onApplyEffect(effect, frameRange);
+    setIsPreviewing(false);
   };
   
-  const handlePreview = () => {
-    onPreviewEffect(effect);
-  };
-  
-  const handlePreviewEnd = () => {
-    onPreviewEffect(null);
+  const handlePreviewToggle = () => {
+    if (isPreviewing) {
+      onPreviewEffect(null);
+      setIsPreviewing(false);
+    } else {
+      onPreviewEffect(effect);
+      setIsPreviewing(true);
+    }
   };
   
   return (
@@ -124,12 +162,19 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
             variant="outline" 
             size="sm"
             className="gap-1"
-            onMouseDown={handlePreview}
-            onMouseUp={handlePreviewEnd}
-            onMouseLeave={handlePreviewEnd}
+            onClick={handlePreviewToggle}
           >
-            <Play className="h-4 w-4" />
-            Preview
+            {isPreviewing ? (
+              <>
+                <Pause className="h-4 w-4" />
+                Stop Preview
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                Preview
+              </>
+            )}
           </Button>
           <Button 
             size="sm"
