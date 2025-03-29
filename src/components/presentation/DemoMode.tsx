@@ -14,27 +14,27 @@ const DemoMode: React.FC = () => {
     {
       title: "Video Upload",
       description: "Upload any video file and our system will automatically extract frames for animation.",
-      image: "/placeholder.svg"
+      image: "https://res.cloudinary.com/dyve1c6cb/image/upload/v1743247247/mjilqiovcf6rwzqxjd4i.png"
     },
     {
       title: "Frame Extraction",
       description: "Advanced frame extraction technology captures the perfect moments from your video.",
-      image: "/placeholder.svg"
+      image: "https://res.cloudinary.com/dyve1c6cb/image/upload/v1743247259/v5mkb4li8494wfdnmnqn.png"
     },
     {
       title: "Apply Animation Effects",
       description: "Choose from multiple animation effects and customize duration and parameters.",
-      image: "/placeholder.svg"
+      image: "https://res.cloudinary.com/dyve1c6cb/image/upload/v1743247232/ezafjpccxlhnnthygiio.png"
     },
     {
       title: "Audio Integration",
       description: "Add background music or keep original audio from the video for the perfect composition.",
-      image: "/placeholder.svg"
+      image: "https://res.cloudinary.com/dyve1c6cb/image/upload/v1743247222/m5aoubunpvpliifnbqnb.png"
     },
     {
       title: "High-Quality Export",
       description: "Export your creation in multiple formats with customizable quality settings.",
-      image: "/placeholder.svg"
+      image: "https://res.cloudinary.com/dyve1c6cb/image/upload/v1743247194/gw6z6jw7qajmivognohk.png"
     }
   ];
   
