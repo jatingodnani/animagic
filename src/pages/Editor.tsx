@@ -189,8 +189,6 @@ const Editor = () => {
 const getPreviewClass = (effect: AnimationEffect | null): string => {
   if (!effect) return "";
   
-  const durationClass = "duration-1000";
-  
   switch (effect.type) {
     case "fade":
       return effect.direction === "in" 
@@ -203,9 +201,8 @@ const getPreviewClass = (effect: AnimationEffect | null): string => {
         : "animate-scale-out";
       
     case "rotate":
-      return effect.direction === "clockwise"
-        ? "animate-spin"
-        : "animate-[spin_2s_linear_infinite_reverse]";
+      // Apply specific rotation animation class
+      return "transition-all transform";
       
     case "move":
       switch (effect.direction) {
@@ -235,6 +232,16 @@ const getPreviewStyle = (effect: AnimationEffect | null): React.CSSProperties =>
   const style: React.CSSProperties = {
     animationDuration: `${2 / intensityFactor}s`,
   };
+  
+  // Add specific rotation styles for the rotate effect
+  if (effect.type === "rotate") {
+    const rotationDegrees = 360 * intensityFactor;
+    const rotationDirection = effect.direction === "clockwise" ? 1 : -1;
+    
+    style.animation = "none"; // Disable default animation
+    style.transform = `rotate(${rotationDegrees * rotationDirection}deg)`;
+    style.transition = `transform ${2000 / effect.intensity}ms linear infinite`;
+  }
   
   return style;
 };

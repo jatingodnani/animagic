@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Tabs, 
@@ -50,14 +49,12 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
   const [applyToAllFrames, setApplyToAllFrames] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   
-  // Update frame range when selected frame changes
   useEffect(() => {
     if (!applyToAllFrames) {
       setFrameRange([selectedFrame, selectedFrame]);
     }
   }, [selectedFrame, applyToAllFrames]);
   
-  // Update frame range when "apply to all frames" changes
   useEffect(() => {
     if (applyToAllFrames) {
       setFrameRange([0, totalFrames - 1]);
@@ -66,7 +63,6 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
     }
   }, [applyToAllFrames, selectedFrame, totalFrames]);
   
-  // Clear preview effect when component unmounts
   useEffect(() => {
     return () => {
       onPreviewEffect(null);
@@ -76,7 +72,6 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
   const handleEffectTypeChange = (type: string) => {
     let newDirection = effect.direction;
     
-    // Set default direction for each effect type
     switch (type) {
       case 'fade':
         newDirection = 'in';
@@ -92,19 +87,16 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
         break;
     }
     
-    setEffect({
-      ...effect,
+    const newEffect = {
       type: type as AnimationEffect['type'],
+      intensity: effect.intensity,
       direction: newDirection as AnimationEffect['direction']
-    });
+    };
     
-    // Update preview if it's active
+    setEffect(newEffect);
+    
     if (isPreviewing) {
-      onPreviewEffect({
-        type: type as AnimationEffect['type'],
-        intensity: effect.intensity,
-        direction: newDirection as AnimationEffect['direction']
-      });
+      onPreviewEffect(newEffect);
     }
   };
   
@@ -114,7 +106,6 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
       direction: direction as AnimationEffect['direction']
     });
     
-    // Update preview if it's active
     if (isPreviewing) {
       onPreviewEffect({
         ...effect,
@@ -129,7 +120,6 @@ const AnimationTools: React.FC<AnimationToolsProps> = ({
       intensity: value[0]
     });
     
-    // Update preview if it's active
     if (isPreviewing) {
       onPreviewEffect({
         ...effect,
