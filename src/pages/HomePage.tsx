@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const HomePage = () => {
-  // Setup scroll animations when component mounts
   useEffect(() => {
     setupScrollAnimations();
     
@@ -35,14 +33,11 @@ const HomePage = () => {
 
   return (
     <div className="relative min-h-screen">
-      {/* Navigation bar */}
       <Navbar />
       
-      {/* Background animation */}
       <AnimatedBackground />
       <AnimatedCursor trailCount={5} />
       
-      {/* Hero section */}
       <section className="relative py-20 md:py-32 overflow-hidden">
         <FloatingShapes count={12} />
         
@@ -90,7 +85,6 @@ const HomePage = () => {
         </div>
       </section>
       
-      {/* Featured preview */}
       <ParallaxSection className="py-20 bg-white" speed={0.1} direction="up">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -118,7 +112,6 @@ const HomePage = () => {
         </div>
       </ParallaxSection>
       
-      {/* Features section */}
       <section id="features" className="py-20 bg-gradient-to-b from-white to-animation-purple/5 relative">
         <FloatingShapes count={8} className="opacity-30" />
         
@@ -187,7 +180,6 @@ const HomePage = () => {
         </div>
       </section>
       
-      {/* Tutorial section */}
       <section id="tutorial" className="py-20 bg-white relative">
         <FloatingShapes count={6} className="opacity-20" />
         
@@ -195,7 +187,7 @@ const HomePage = () => {
           <div className="text-center mb-16">
             <AnimatedText
               text="How It Works"
-              className="text-3xl md:text-4xl font-bold mb-4 text-center"
+              className="text-3xl md:text-4xl font-bold mb-4 text-center mx-auto"
               delay={100}
               highlightColor="bg-animation-purple/10"
             />
@@ -244,7 +236,6 @@ const HomePage = () => {
         </div>
       </section>
       
-      {/* Call to action */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-animation-purple/90 to-animation-purple/70 overflow-hidden">
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 animate-pulse-slow"></div>
@@ -306,11 +297,9 @@ const HomePage = () => {
         </div>
       </section>
       
-      {/* Footer */}
       <Footer />
     </div>
   );
 };
 
 export default HomePage;
-
