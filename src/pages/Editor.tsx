@@ -21,7 +21,7 @@ const Editor = () => {
   const [frames, setFrames] = useState<string[]>([]);
   const [selectedFrame, setSelectedFrame] = useState(0);
   const [previewEffect, setPreviewEffect] = useState<AnimationEffect | null>(null);
-  const [activeEffect, setActiveEffect] = useState<AnimationEffect | null>(null);
+  const [activeEffects, setActiveEffects] = useState<AnimationEffect[]>([]); // Changed to array
   const [frameRate] = useState(24);
   const [animationDuration, setAnimationDuration] = useState(5); // Default 5 seconds
   const { toast } = useToast();
@@ -56,7 +56,12 @@ const Editor = () => {
   
   const handleApplyEffect = (effect: AnimationEffect, frameRange: [number, number], duration: number) => {
     setAnimationDuration(duration);
-    setActiveEffect(effect); // Store the active effect for the VideoExporter
+    
+    // Add effect to active effects array instead of replacing it
+    setActiveEffects(prevEffects => {
+      // Create a new array with the existing effects plus the new one
+      return [...prevEffects, effect];
+    });
     
     console.log(`Applying ${effect.type} effect with duration: ${duration}s to frames ${frameRange[0] + 1} to ${frameRange[1] + 1}`);
     
@@ -282,7 +287,7 @@ const Editor = () => {
                   <VideoExporter 
                     frames={frames} 
                     frameRate={frameRate}
-                    currentEffect={activeEffect} // Pass the active effect to the exporter
+                    currentEffects={activeEffects} // Pass array of effects instead of single effect
                   />
                 </div>
               </div>

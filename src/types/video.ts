@@ -23,5 +23,5 @@ export interface ExportSettings {
 export interface VideoExporterProps {
   frames: string[];
   frameRate?: number;
-  currentEffect?: AnimationEffect | null;
+  currentEffects?: AnimationEffect[]; // Changed from currentEffect to currentEffects array
 }

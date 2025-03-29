@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Download, Settings, Film, AlertTriangle } from 'lucide-react';
@@ -19,7 +18,11 @@ import AudioSettings from './video-export/AudioSettings';
 import ExportProgress from './video-export/ExportProgress';
 import ExportSummary from './video-export/ExportSummary';
 
-const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, currentEffect = null }) => {
+const VideoExporter: React.FC<VideoExporterProps> = ({ 
+  frames, 
+  frameRate = 24, 
+  currentEffects = [] // Accept an array of effects with default empty array
+}) => {
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
@@ -67,7 +70,6 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, c
     }
   }, [settings.quality, settings.useCustomResolution]);
   
-  // Cleanup URL when component unmounts
   useEffect(() => {
     return () => {
       if (exportedVideoUrl) {
@@ -76,8 +78,23 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, c
     };
   }, [exportedVideoUrl]);
   
+  const applyAllEffects = async (
+    ctx: CanvasRenderingContext2D, 
+    frameImg: HTMLImageElement, 
+    effects: AnimationEffect[], 
+    progress: number
+  ): Promise<void> => {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.drawImage(frameImg, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    for (const effect of effects) {
+      ctx.save();
+      await applyAnimationEffect(ctx, frameImg, effect, progress);
+      ctx.restore();
+    }
+  };
+  
   const createVideoFromFrames = async (): Promise<Blob> => {
-    // Create a canvas to draw frames
     const canvas = document.createElement('canvas');
     const qualitySettings = getQualitySettings(settings);
     canvas.width = qualitySettings.width;
@@ -88,7 +105,6 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, c
       throw new Error("Could not create canvas context");
     }
     
-    // Load all frames as Image objects
     const frameImages = await Promise.all(
       frames.map(frameSrc => {
         return new Promise<HTMLImageElement>((resolve) => {
@@ -99,15 +115,11 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, c
       })
     );
     
-    // For GIF format - use gif.js or similar library in a real implementation
     if (settings.format === 'gif') {
-      // Simple placeholder - in production you'd use a proper GIF encoder
       return new Blob([new ArrayBuffer(1000)], { type: 'image/gif' });
     }
     
-    // For video formats, create a real video using MediaRecorder
     try {
-      // Create MediaRecorder with canvas stream
       const stream = canvas.captureStream(settings.frameRate);
       const recorder = new MediaRecorder(stream, {
         mimeType: settings.format === 'webm' ? 'video/webm' : 'video/mp4',
@@ -121,10 +133,8 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, c
         }
       };
       
-      // Start recording
       recorder.start(100);
       
-      // Wait for recording to finish
       const recordingPromise = new Promise<Blob>((resolve) => {
         recorder.onstop = () => {
           const blob = new Blob(chunks, { 
@@ -134,44 +144,32 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, c
         };
       });
       
-      // Calculate the total frames needed for the animation
       const totalFrames = getTotalFramesForAnimation(settings);
       const frameDuration = 1000 / settings.frameRate;
       
-      // Draw frames to canvas sequentially with animation effects
       for (let i = 0; i < totalFrames; i++) {
         const frameIndex = Math.min(i % frameImages.length, frameImages.length - 1);
         const frameImg = frameImages[frameIndex];
         
-        // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // If we have an effect to apply, use it
-        if (currentEffect) {
-          // Calculate the progress based on the current frame (0 to 1)
+        if (currentEffects.length > 0) {
           const progress = i / (totalFrames - 1);
-          
-          // Apply the animation effect at the current progress point
-          await applyAnimationEffect(ctx, frameImg, currentEffect, progress);
+          await applyAllEffects(ctx, frameImg, currentEffects, progress);
         } else {
-          // No animation effect, just draw the frame
           ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
         }
         
-        // Update progress
         const progress = Math.round((i + 1) / totalFrames * 100);
         setExportProgress(progress);
         
-        // Wait a small amount before drawing the next frame
         await new Promise(resolve => setTimeout(resolve, frameDuration / 10));
       }
       
-      // Stop recording
       recorder.stop();
       return await recordingPromise;
     } catch (error) {
       console.error("Error creating video:", error);
-      // Fallback to creating a fake video blob
       return new Blob([new ArrayBuffer(10000)], { 
         type: settings.format === 'webm' ? 'video/webm' : 'video/mp4' 
       });
@@ -210,7 +208,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, c
       console.log(`Quality settings: ${qualitySettings.width}x${qualitySettings.height} at ${qualitySettings.bitrate} bps`);
       console.log(`Platform: ${isMacOS ? 'macOS' : 'Other'}, Format: ${settings.format}`);
       console.log(`Audio included: ${settings.includeAudio}, Audio file: ${settings.audioFile?.name || 'None'}`);
-      console.log(`Animation effect applied: ${currentEffect ? currentEffect.type : 'None'}`);
+      console.log(`Animation effects applied: ${currentEffects.length > 0 ? currentEffects.map(e => e.type).join(', ') : 'None'}`);
       
       if (isMacOS && settings.format !== "gif" && !hasWebCodecSupport) {
         toast({
@@ -226,14 +224,11 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, c
         });
       }
       
-      // Create the video file with animation effects
       const videoBlob = await createVideoFromFrames();
       
-      // Create a download URL
       const videoUrl = URL.createObjectURL(videoBlob);
       setExportedVideoUrl(videoUrl);
       
-      // Trigger download
       const filename = `animated-video-${durationInSeconds}s.${settings.format}`;
       const a = document.createElement("a");
       a.href = videoUrl;
@@ -249,7 +244,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, c
       
       toast({
         title: "Export completed",
-        description: `Your ${durationInSeconds}-second animated video has been exported as ${settings.format.toUpperCase()} with ${totalFramesForAnimation} frames${currentEffect ? ` and ${currentEffect.type} effect` : ''}${settings.includeAudio ? ' and audio' : ''}.`,
+        description: `Your ${durationInSeconds}-second animated video has been exported as ${settings.format.toUpperCase()} with ${totalFramesForAnimation} frames${currentEffects.length > 0 ? ` and effects: ${currentEffects.map(e => e.type).join(', ')}` : ''}${settings.includeAudio ? ' and audio' : ''}.`,
       });
     } catch (error) {
       console.error("Error exporting video:", error);
@@ -330,6 +325,19 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24, c
         frames={frames} 
         isMacOS={isMacOS} 
       />
+      
+      {currentEffects.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <p className="text-sm font-medium mb-2">Applied Effects:</p>
+          <div className="flex flex-wrap gap-2">
+            {currentEffects.map((effect, index) => (
+              <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-animation-purple bg-opacity-10 text-animation-purple">
+                {effect.type} {effect.direction ? `(${effect.direction})` : ''}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
