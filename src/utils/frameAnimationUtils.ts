@@ -2,6 +2,7 @@
 /**
  * Utilities for frame extraction, animation, and encoding using the Web Codecs API
  */
+import { AnimationEffect } from '@/components/AnimationTools';
 
 // Step 1: Extract frame from video
 export async function extractFrame(videoFile: File, targetFrameIndex: number): Promise<VideoFrame> {

@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Download, Settings, Film, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { ExportSettings, VideoExporterProps } from '@/types/video';
+import { AnimationEffect } from '@/components/AnimationTools';
 import { 
   getDefaultExportSettings, 
   getTotalFramesForAnimation, 
@@ -89,7 +91,13 @@ const VideoExporter: React.FC<VideoExporterProps> = ({
     
     for (const effect of effects) {
       ctx.save();
-      await applyAnimationEffect(ctx, frameImg, effect, progress);
+      await applyAnimationEffect(ctx, frameImg, {
+        type: effect.type,
+        intensity: effect.intensity,
+        direction: effect.direction,
+        color: effect.color,
+        keyframes: effect.keyframes
+      }, progress);
       ctx.restore();
     }
   };
