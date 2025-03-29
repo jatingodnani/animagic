@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,8 @@ import AnimatedCursor from '@/components/animation/AnimatedCursor';
 import TypewriterText from '@/components/animation/TypewriterText';
 import AnimatedFeatureCard from '@/components/animation/AnimatedFeatureCard';
 import { setupScrollAnimations } from '@/utils/scrollUtils';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 const HomePage = () => {
   // Setup scroll animations when component mounts
@@ -33,6 +34,9 @@ const HomePage = () => {
 
   return (
     <div className="relative min-h-screen">
+      {/* Navigation bar */}
+      <Navbar />
+      
       {/* Background animation */}
       <AnimatedBackground />
       <AnimatedCursor trailCount={5} />
@@ -114,7 +118,7 @@ const HomePage = () => {
       </ParallaxSection>
       
       {/* Features section */}
-      <section className="py-20 bg-gradient-to-b from-white to-animation-purple/5 relative">
+      <section id="features" className="py-20 bg-gradient-to-b from-white to-animation-purple/5 relative">
         <FloatingShapes count={8} className="opacity-30" />
         
         <div className="container mx-auto px-4">
@@ -182,6 +186,63 @@ const HomePage = () => {
         </div>
       </section>
       
+      {/* Tutorial section */}
+      <section id="tutorial" className="py-20 bg-white relative">
+        <FloatingShapes count={6} className="opacity-20" />
+        
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <AnimatedText
+              text="How It Works"
+              className="text-3xl md:text-4xl font-bold mb-4"
+              delay={100}
+              highlightColor="bg-animation-purple/10"
+            />
+            <p className="text-animation-gray-600 max-w-2xl mx-auto">
+              Follow these simple steps to create stunning animations with AniMagic.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="relative">
+              <div className="absolute -left-4 top-0 w-8 h-8 rounded-full bg-animation-purple text-white flex items-center justify-center font-bold">1</div>
+              <AnimatedFeatureCard
+                title="Upload Your Video"
+                description="Start by uploading the video you want to animate. We support most popular video formats."
+                icon={Upload}
+                delay={0}
+                buttonText="Learn More"
+                buttonHref="/editor"
+              />
+            </div>
+            
+            <div className="relative">
+              <div className="absolute -left-4 top-0 w-8 h-8 rounded-full bg-animation-purple text-white flex items-center justify-center font-bold">2</div>
+              <AnimatedFeatureCard
+                title="Apply Animations"
+                description="Choose from our library of animations and effects to transform your video."
+                icon={Sparkles}
+                delay={1}
+                buttonText="See Examples"
+                buttonHref="/editor"
+              />
+            </div>
+            
+            <div className="relative">
+              <div className="absolute -left-4 top-0 w-8 h-8 rounded-full bg-animation-purple text-white flex items-center justify-center font-bold">3</div>
+              <AnimatedFeatureCard
+                title="Export & Share"
+                description="Export your animated video in high quality and share it with the world."
+                icon={Download}
+                delay={2}
+                buttonText="Try Now"
+                buttonHref="/editor"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+      
       {/* Call to action */}
       <section className="py-20 bg-animation-purple text-white">
         <div className="container mx-auto px-4">
@@ -209,6 +270,9 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
