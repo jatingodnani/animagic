@@ -92,8 +92,6 @@ export async function applyAnimationEffect(
       if (effect.direction === 'in') {
         // Start small and grow
         const scale = 1 + (progress * normalizedIntensity);
-        const offsetX = (width - width * scale) / 2;
-        const offsetY = (height - height * scale) / 2;
         
         ctx.translate(zoomCenter, zoomCenterY);
         ctx.scale(scale, scale);
@@ -101,8 +99,6 @@ export async function applyAnimationEffect(
       } else { // 'out'
         // Start large and shrink
         const scale = 1 + (normalizedIntensity - (progress * normalizedIntensity));
-        const offsetX = (width - width * scale) / 2;
-        const offsetY = (height - height * scale) / 2;
         
         ctx.translate(zoomCenter, zoomCenterY);
         ctx.scale(scale, scale);
@@ -134,16 +130,16 @@ export async function applyAnimationEffect(
       
       switch(effect.direction) {
         case 'left':
-          xOffset = (1 - progress) * moveAmount;
+          xOffset = -progress * moveAmount;
           break;
         case 'right':
-          xOffset = (progress - 1) * moveAmount;
+          xOffset = progress * moveAmount;
           break;
         case 'up':
-          yOffset = (1 - progress) * moveAmount;
+          yOffset = -progress * moveAmount;
           break;
         case 'down':
-          yOffset = (progress - 1) * moveAmount;
+          yOffset = progress * moveAmount;
           break;
       }
       
@@ -319,26 +315,30 @@ export function previewAnimation(
   const totalFrames = durationInSeconds * fps;
   let frameCount = 0;
   let animationId: number;
+  let startTime: number | null = null;
   
   // Animation function
-  const animate = () => {
-    // Calculate progress (0 to 1)
-    // For looping animation we use sin, for one-time animation use frameCount/totalFrames directly
-    const progress = Math.min(frameCount / totalFrames, 1);
+  const animate = (timestamp: number) => {
+    if (!startTime) startTime = timestamp;
     
-    // Apply the animation effect
+    // Calculate elapsed time and progress
+    const elapsedTime = timestamp - startTime;
+    const elapsedSeconds = elapsedTime / 1000;
+    
+    // Calculate progress (0 to 1) based on actual elapsed time
+    let progress = Math.min(elapsedSeconds / durationInSeconds, 1);
+    
+    // Loop the animation when it completes
+    if (progress >= 1) {
+      startTime = timestamp; // Reset the start time
+      progress = 0;
+    }
+    
+    // Apply the animation effect based on current progress
     applyAnimationEffect(ctx, img, effect, progress);
     
-    // Increment frame counter and request next frame
-    frameCount++;
-    
-    if (frameCount <= totalFrames) {
-      animationId = requestAnimationFrame(animate);
-    } else {
-      // Reset animation after completing the duration
-      frameCount = 0;
-      animationId = requestAnimationFrame(animate);
-    }
+    // Continue animation loop
+    animationId = requestAnimationFrame(animate);
   };
   
   // Wait for image to load before starting animation
@@ -350,7 +350,7 @@ export function previewAnimation(
     }
     
     // Start the animation
-    animate();
+    animationId = requestAnimationFrame(animate);
   };
   
   // Return a cleanup function to stop animation

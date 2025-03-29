@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -26,6 +26,12 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
   const [exportFormat, setExportFormat] = useState("mp4");
   const [animationDuration, setAnimationDuration] = useState("5"); // Default 5 seconds
   const { toast } = useToast();
+  
+  // Calculate total frames based on duration and frame rate
+  const getTotalFramesForAnimation = () => {
+    const duration = parseFloat(animationDuration);
+    return Math.round(duration * frameRate);
+  };
   
   const getQualitySettings = () => {
     switch (exportQuality) {
@@ -54,9 +60,14 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       setIsExporting(true);
       setExportProgress(0);
       
+      // Calculate total frames for the animation based on duration and frame rate
+      const durationInSeconds = parseFloat(animationDuration);
+      const totalFramesForAnimation = getTotalFramesForAnimation();
+      
       // Simulate video export process
       let progress = 0;
-      const totalSteps = frames.length + 20; // Additional steps for encoding
+      // Add more steps to account for the animation processing
+      const totalSteps = totalFramesForAnimation + 20; // Additional steps for encoding
       
       const interval = setInterval(() => {
         progress += 1;
@@ -73,7 +84,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
             
             toast({
               title: "Export completed",
-              description: `Your ${animationDuration}-second animated video has been exported successfully.`,
+              description: `Your ${animationDuration}-second animated video has been exported successfully with ${totalFramesForAnimation} frames.`,
             });
             
             // Simulate download
@@ -83,7 +94,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
             a.click();
           }, 1000);
         }
-      }, 100);
+      }, 50); // Faster simulation for better UX
       
     } catch (error) {
       console.error("Error exporting video:", error);
@@ -95,6 +106,12 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       });
     }
   };
+  
+  // Update duration when frame rate changes to maintain consistency
+  useEffect(() => {
+    // Just to ensure we have the latest calculations if frameRate changes
+    getTotalFramesForAnimation();
+  }, [frameRate, animationDuration]);
   
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
@@ -131,6 +148,9 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
               onChange={(e) => setAnimationDuration(e.target.value)}
               className="w-full"
             />
+            <p className="text-xs text-animation-gray-500">
+              This will create a {getTotalFramesForAnimation()} frame animation at {frameRate} fps
+            </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -175,6 +195,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
         <p>Frame count: {frames.length} frames</p>
         <p>Frame rate: {frameRate} fps</p>
         <p>Animation duration: {animationDuration} seconds</p>
+        <p>Total animation frames: {getTotalFramesForAnimation()} frames</p>
       </div>
     </div>
   );
