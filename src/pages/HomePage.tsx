@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -50,12 +51,12 @@ const HomePage = () => {
             <div className="mb-6">
               <AnimatedText
                 text="Transform Your Videos With Magical Animations"
-                className="text-4xl md:text-6xl font-bold text-animation-gray-800"
+                className="text-4xl md:text-6xl font-bold text-animation-gray-800 text-center"
                 delay={300}
               />
             </div>
             
-            <div className="mb-8 text-lg md:text-xl text-animation-gray-600">
+            <div className="mb-8 text-lg md:text-xl text-animation-gray-600 text-center">
               <TypewriterText 
                 texts={typingTexts} 
                 typingSpeed={80} 
@@ -67,7 +68,7 @@ const HomePage = () => {
               <Link to="/editor">
                 <Button 
                   size="lg" 
-                  className="group bg-animation-purple hover:bg-animation-purple/90 text-white px-8"
+                  className="group bg-animation-purple hover:bg-animation-purple/90 text-white px-8 w-full sm:w-auto"
                 >
                   Try Now
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -78,7 +79,7 @@ const HomePage = () => {
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="px-8"
+                  className="px-8 w-full sm:w-auto"
                 >
                   Watch Demo
                   <Film className="ml-2 h-4 w-4" />
@@ -103,10 +104,10 @@ const HomePage = () => {
                 className="w-full h-full object-cover rounded-2xl"
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-black/70 backdrop-blur-sm text-white px-6 py-4 rounded-lg">
+                <div className="bg-black/70 backdrop-blur-sm text-white px-6 py-4 rounded-lg text-center">
                   <h3 className="text-xl font-semibold mb-2">Ready to Create?</h3>
                   <Link to="/editor">
-                    <Button className="bg-animation-purple hover:bg-animation-purple/90">
+                    <Button className="bg-animation-purple hover:bg-animation-purple/90 w-full sm:w-auto">
                       Open Editor
                     </Button>
                   </Link>
@@ -125,11 +126,11 @@ const HomePage = () => {
           <div className="text-center mb-16">
             <AnimatedText
               text="Powerful Features For Your Creativity"
-              className="text-3xl md:text-4xl font-bold mb-4"
+              className="text-3xl md:text-4xl font-bold mb-4 text-center"
               delay={100}
               highlightColor="bg-animation-purple/10"
             />
-            <p className="text-animation-gray-600 max-w-2xl mx-auto">
+            <p className="text-animation-gray-600 max-w-2xl mx-auto text-center">
               Our animation platform is packed with powerful tools to help you create stunning animations with just a few clicks.
             </p>
           </div>
@@ -194,11 +195,11 @@ const HomePage = () => {
           <div className="text-center mb-16">
             <AnimatedText
               text="How It Works"
-              className="text-3xl md:text-4xl font-bold mb-4"
+              className="text-3xl md:text-4xl font-bold mb-4 text-center"
               delay={100}
               highlightColor="bg-animation-purple/10"
             />
-            <p className="text-animation-gray-600 max-w-2xl mx-auto">
+            <p className="text-animation-gray-600 max-w-2xl mx-auto text-center">
               Follow these simple steps to create stunning animations with AniMagic.
             </p>
           </div>
@@ -274,12 +275,12 @@ const HomePage = () => {
               <div className="text-center">
                 <AnimatedText
                   text="Ready to Transform Your Videos?"
-                  className="text-3xl md:text-4xl font-bold text-white mb-6"
+                  className="text-3xl md:text-4xl font-bold text-white mb-6 text-center"
                   delay={100}
                   highlightColor="bg-white/20"
                 />
                 
-                <p className="text-white/90 mb-8 text-lg max-w-2xl mx-auto leading-relaxed">
+                <p className="text-white/90 mb-8 text-lg max-w-2xl mx-auto leading-relaxed text-center">
                   Join thousands of creators who use AniMagic to bring their videos to life with stunning animations. Start creating professional-quality animations today.
                 </p>
                 
@@ -287,7 +288,7 @@ const HomePage = () => {
                   <Link to="/editor">
                     <Button 
                       size="lg" 
-                      className="relative overflow-hidden group bg-white text-animation-purple hover:bg-white/90 px-10 py-6 shadow-glow"
+                      className="relative overflow-hidden group bg-white text-animation-purple hover:bg-white/90 px-10 py-6 shadow-glow w-full sm:w-auto"
                     >
                       <span className="relative z-10 text-lg font-medium">Start Creating Now</span>
                       <span className="absolute inset-0 bg-animation-purple/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
@@ -296,7 +297,7 @@ const HomePage = () => {
                   </Link>
                 </div>
                 
-                <div className="mt-6 text-white/80 text-sm">
+                <div className="mt-6 text-white/80 text-sm text-center">
                   No credit card required. Start with our free plan.
                 </div>
               </div>

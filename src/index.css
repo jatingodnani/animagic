@@ -132,6 +132,31 @@
     @apply border border-gray-200 rounded-md overflow-hidden hover:border-animation-purple/50 transition-all duration-200;
   }
   
+  /* Text alignment classes */
+  .text-align-center {
+    @apply text-center;
+  }
+  
+  .text-align-left {
+    @apply text-left;
+  }
+  
+  .text-align-right {
+    @apply text-right;
+  }
+  
+  .card-content {
+    @apply p-6 flex flex-col items-center text-center;
+  }
+  
+  .button-group {
+    @apply w-full flex flex-col sm:flex-row gap-4 justify-center items-center;
+  }
+  
+  .responsive-button {
+    @apply w-full sm:w-auto text-center flex items-center justify-center;
+  }
+  
   /* Background particles */
   .bg-particle {
     @apply absolute rounded-full bg-animation-purple opacity-5 pointer-events-none;
