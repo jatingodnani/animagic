@@ -304,7 +304,7 @@ export function previewAnimation(
   },
   durationInSeconds: number = 5 // Default preview duration of 5 seconds
 ): () => void {
-  console.log(`Previewing animation for ${durationInSeconds} seconds`);
+  console.log(`Previewing animation for ${durationInSeconds} seconds with effect type: ${effect.type}`);
   
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -316,7 +316,7 @@ export function previewAnimation(
   img.src = frameDataUrl;
   
   // Animation parameters
-  const fps = 60;
+  const fps = 60; // Fixed fps for smooth animation
   let animationId: number;
   let startTime: number | null = null;
   
@@ -330,13 +330,7 @@ export function previewAnimation(
     
     // Calculate progress (0 to 1) based on actual elapsed time
     // This ensures the animation takes exactly durationInSeconds to complete
-    let progress = Math.min(elapsedSeconds / durationInSeconds, 1);
-    
-    // Loop the animation when it completes
-    if (progress >= 1) {
-      startTime = timestamp; // Reset the start time
-      progress = 0;
-    }
+    let progress = (elapsedSeconds % durationInSeconds) / durationInSeconds;
     
     // Apply the animation effect based on current progress
     applyAnimationEffect(ctx, img, effect, progress);
@@ -353,7 +347,7 @@ export function previewAnimation(
       canvas.height = img.height;
     }
     
-    console.log(`Starting animation preview with dimensions ${img.width}x${img.height}`);
+    console.log(`Starting animation preview with dimensions ${img.width}x${img.height} for ${durationInSeconds} seconds`);
     
     // Start the animation
     animationId = requestAnimationFrame(animate);

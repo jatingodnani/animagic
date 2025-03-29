@@ -63,7 +63,8 @@ const Editor = () => {
     setAnimationDuration(duration);
     
     // In a real implementation, this would actually modify the frames with the effect
-    // For this demo, we'll just show a toast
+    console.log(`Applying ${effect.type} effect with duration: ${duration}s to frames ${frameRange[0] + 1} to ${frameRange[1] + 1}`);
+    
     toast({
       title: "Effect applied",
       description: `Applied ${effect.type} effect to frames ${frameRange[0] + 1} to ${frameRange[1] + 1} for ${duration} seconds`,
@@ -86,24 +87,28 @@ const Editor = () => {
     // Set new effect and start preview if needed
     setPreviewEffect(effect);
     if (effect && canvasRef.current && frames[selectedFrame]) {
-      startPreviewAnimation(effect);
+      console.log(`Starting preview with duration: ${duration || animationDuration}s`);
+      startPreviewAnimation(effect, duration);
     }
   };
   
   // Start animation preview
-  const startPreviewAnimation = (effect: AnimationEffect) => {
+  const startPreviewAnimation = (effect: AnimationEffect, duration?: number) => {
     if (!canvasRef.current || !frames[selectedFrame]) return;
     
     try {
       // Stop any existing animation
       stopPreviewAnimation();
       
+      const effectDuration = duration || animationDuration;
+      console.log(`Starting animation preview with effect: ${effect.type}, duration: ${effectDuration}s`);
+      
       // Start new animation and store cleanup function
       animationCleanupRef.current = previewAnimation(
         canvasRef.current,
         frames[selectedFrame],
         effect,
-        animationDuration
+        effectDuration
       );
     } catch (error) {
       console.error("Error starting animation preview:", error);
