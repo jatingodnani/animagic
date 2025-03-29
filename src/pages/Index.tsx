@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { 
@@ -15,6 +15,13 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const Index = () => {
+  const [animateHero, setAnimateHero] = useState(false);
+
+  useEffect(() => {
+    // Trigger animations after component mounts
+    setAnimateHero(true);
+  }, []);
+
   // Example animations
   const exampleAnimations = [
     {
@@ -90,10 +97,10 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="hero-gradient py-20 px-4 md:py-32">
+      <section className="hero-gradient py-20 px-4 md:py-32 overflow-hidden">
         <div className="container max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="animate-fade-in">
+            <div className={`transition-all duration-1000 delay-300 transform ${animateHero ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}>
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
                 Transform Videos into Stunning Animations
               </h1>
@@ -102,32 +109,32 @@ const Index = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/editor">
-                  <Button className="w-full sm:w-auto bg-white text-animation-purple hover:bg-white/90 shadow-lg">
+                  <Button className="w-full sm:w-auto bg-white text-animation-purple hover:bg-white/90 shadow-lg transform transition-transform hover:scale-105 duration-300">
                     Start Editing Now
-                    <ChevronRight className="ml-2 h-4 w-4" />
+                    <ChevronRight className="ml-2 h-4 w-4 animate-bounce" />
                   </Button>
                 </Link>
                 <a href="#tutorial">
-                  <Button variant="outline" className="w-full sm:w-auto text-white border-white hover:bg-white/10">
+                  <Button variant="outline" className="w-full sm:w-auto text-white border-white hover:bg-white/10 transform transition-transform hover:scale-105 duration-300">
                     How It Works
                   </Button>
                 </a>
               </div>
             </div>
-            <div className="hidden md:block relative animate-scale-in">
-              <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-2 shadow-2xl overflow-hidden">
+            <div className={`hidden md:block relative transition-all duration-1000 delay-500 transform ${animateHero ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}>
+              <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-2 shadow-2xl overflow-hidden hover:shadow-animation-purple/50 transition-shadow duration-500">
                 <img 
                   src="https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=500&h=330" 
                   alt="Animation Editor Preview" 
-                  className="rounded-xl"
+                  className="rounded-xl transition-transform duration-700 hover:scale-105"
                 />
                 <div className="absolute inset-0 rounded-xl flex items-center justify-center">
-                  <div className="bg-black/30 p-4 rounded-full animate-pulse-purple">
+                  <div className="bg-black/30 p-4 rounded-full animate-pulse-purple hover:bg-animation-purple/50 transition-colors duration-300 cursor-pointer">
                     <Play className="h-12 w-12 text-white" />
                   </div>
                 </div>
               </div>
-              <div className="absolute top-1/2 -right-6 -translate-y-1/2 transform -rotate-12 bg-white/10 backdrop-blur-sm rounded-2xl p-2 shadow-xl">
+              <div className="absolute top-1/2 -right-6 -translate-y-1/2 transform -rotate-12 bg-white/10 backdrop-blur-sm rounded-2xl p-2 shadow-xl animate-float">
                 <img 
                   src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&q=80&w=300&h=200" 
                   alt="Animation Effect" 
@@ -143,19 +150,23 @@ const Index = () => {
       <section className="py-16 px-4 bg-white">
         <div className="container max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold mb-4">Animation Examples</h2>
-            <p className="text-animation-gray-500 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-semibold mb-4 animate-fade-in">Animation Examples</h2>
+            <p className="text-animation-gray-500 max-w-2xl mx-auto animate-fade-in">
               Transform ordinary videos into eye-catching animations with our powerful editor. Here are some examples of what you can create.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {exampleAnimations.map((animation) => (
-              <div key={animation.id} className="animation-card group">
+            {exampleAnimations.map((animation, index) => (
+              <div 
+                key={animation.id} 
+                className="animation-card group transform transition-all duration-300 hover:scale-105 hover:-rotate-1 hover:shadow-xl"
+                style={{ animationDelay: `${index * 150}ms` }}
+              >
                 <div className="relative overflow-hidden rounded-xl">
                   <img 
                     src={animation.image} 
                     alt={animation.title} 
-                    className="w-full aspect-video object-cover"
+                    className="w-full aspect-video object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-6">
                     <div>
@@ -163,7 +174,7 @@ const Index = () => {
                       <p className="text-white/80 text-sm">{animation.description}</p>
                     </div>
                   </div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
                     <div className="bg-animation-purple/80 p-3 rounded-full">
                       <Play className="h-8 w-8 text-white" />
                     </div>
@@ -174,9 +185,9 @@ const Index = () => {
           </div>
           <div className="text-center mt-12">
             <Link to="/editor">
-              <Button className="bg-animation-purple hover:bg-animation-purple/90">
+              <Button className="bg-animation-purple hover:bg-animation-purple/90 transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
                 Create Your Own Animation
-                <Zap className="ml-2 h-4 w-4" />
+                <Zap className="ml-2 h-4 w-4 animate-pulse" />
               </Button>
             </Link>
           </div>
@@ -187,15 +198,19 @@ const Index = () => {
       <section id="features" className="py-16 px-4 bg-animation-gray-100">
         <div className="container max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold mb-4">Powerful Animation Features</h2>
-            <p className="text-animation-gray-500 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-semibold mb-4 animate-fade-in">Powerful Animation Features</h2>
+            <p className="text-animation-gray-500 max-w-2xl mx-auto animate-fade-in">
               Everything you need to create professional animations from your videos, all in one place.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <div key={index} className="feature-card">
-                <div className="mb-4">{feature.icon}</div>
+              <div 
+                key={index} 
+                className="feature-card transform transition-all duration-500 hover:scale-105 hover:shadow-md hover:bg-white/80"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="mb-4 transform transition-all duration-500 hover:scale-110 hover:rotate-6">{feature.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                 <p className="text-animation-gray-500">{feature.description}</p>
               </div>
@@ -208,15 +223,19 @@ const Index = () => {
       <section id="tutorial" className="py-16 px-4 bg-white">
         <div className="container max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold mb-4">How It Works</h2>
-            <p className="text-animation-gray-500 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-semibold mb-4 animate-fade-in">How It Works</h2>
+            <p className="text-animation-gray-500 max-w-2xl mx-auto animate-fade-in">
               Creating animations from your videos is simple with our easy-to-use editor. Just follow these steps.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {tutorialSteps.map((step, index) => (
-              <div key={index} className="relative">
-                <div className="text-3xl font-bold text-animation-purple/20 mb-2">
+              <div 
+                key={index} 
+                className="relative transform transition-all duration-300 hover:translate-y-[-8px]"
+                style={{ animationDelay: `${index * 200}ms` }}
+              >
+                <div className="text-3xl font-bold text-animation-purple/20 mb-2 transform transition-all duration-300 group-hover:scale-110">
                   {step.number}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
@@ -229,9 +248,9 @@ const Index = () => {
           </div>
           <div className="text-center mt-12">
             <Link to="/editor">
-              <Button className="bg-animation-purple hover:bg-animation-purple/90">
+              <Button className="bg-animation-purple hover:bg-animation-purple/90 transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
                 Try It Yourself
-                <ChevronRight className="ml-2 h-4 w-4" />
+                <ChevronRight className="ml-2 h-4 w-4 animate-bounce" />
               </Button>
             </Link>
           </div>
@@ -239,18 +258,19 @@ const Index = () => {
       </section>
       
       {/* CTA Section */}
-      <section className="py-16 px-4 hero-gradient">
-        <div className="container max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+      <section className="py-16 px-4 hero-gradient relative overflow-hidden">
+        <div className="absolute inset-0 bg-animation-purple/10 animate-pulse opacity-30"></div>
+        <div className="container max-w-7xl mx-auto text-center relative z-10">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 animate-fade-in">
             Ready to Create Amazing Animations?
           </h2>
-          <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
+          <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto animate-fade-in">
             Join thousands of creators who use our platform to bring their videos to life with stunning animations.
           </p>
           <Link to="/editor">
-            <Button className="bg-white text-animation-purple hover:bg-white/90 shadow-lg">
+            <Button className="bg-white text-animation-purple hover:bg-white/90 shadow-lg transform transition-transform hover:scale-105 duration-300">
               Start Editing Now
-              <ChevronRight className="ml-2 h-4 w-4" />
+              <ChevronRight className="ml-2 h-4 w-4 animate-bounce" />
             </Button>
           </Link>
         </div>

@@ -131,4 +131,21 @@
   .timeline-item {
     @apply border border-gray-200 rounded-md overflow-hidden hover:border-animation-purple/50 transition-all duration-200;
   }
+  
+  /* New animations */
+  @keyframes float {
+    0% {
+      transform: translateY(0px) rotate(-12deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(-8deg);
+    }
+    100% {
+      transform: translateY(0px) rotate(-12deg);
+    }
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
 }
