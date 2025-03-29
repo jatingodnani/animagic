@@ -48,7 +48,7 @@ const HomePage = () => {
         
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="mb-6">
+            <div className="mb-6 text-center">
               <AnimatedText
                 text="Transform Your Videos With Magical Animations"
                 className="text-4xl md:text-6xl font-bold text-animation-gray-800 text-center"
@@ -64,22 +64,22 @@ const HomePage = () => {
               />
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/editor">
+            <div className="button-group">
+              <Link to="/editor" className="responsive-button">
                 <Button 
                   size="lg" 
-                  className="group bg-animation-purple hover:bg-animation-purple/90 text-white px-8 w-full sm:w-auto"
+                  className="group bg-animation-purple hover:bg-animation-purple/90 text-white px-8"
                 >
                   Try Now
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
               
-              <Link to="/presentation">
+              <Link to="/presentation" className="responsive-button">
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="px-8 w-full sm:w-auto"
+                  className="px-8"
                 >
                   Watch Demo
                   <Film className="ml-2 h-4 w-4" />
@@ -107,7 +107,7 @@ const HomePage = () => {
                 <div className="bg-black/70 backdrop-blur-sm text-white px-6 py-4 rounded-lg text-center">
                   <h3 className="text-xl font-semibold mb-2">Ready to Create?</h3>
                   <Link to="/editor">
-                    <Button className="bg-animation-purple hover:bg-animation-purple/90 w-full sm:w-auto">
+                    <Button className="bg-animation-purple hover:bg-animation-purple/90 w-full">
                       Open Editor
                     </Button>
                   </Link>
@@ -284,11 +284,11 @@ const HomePage = () => {
                   Join thousands of creators who use AniMagic to bring their videos to life with stunning animations. Start creating professional-quality animations today.
                 </p>
                 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link to="/editor">
+                <div className="button-group">
+                  <Link to="/editor" className="responsive-button">
                     <Button 
                       size="lg" 
-                      className="relative overflow-hidden group bg-white text-animation-purple hover:bg-white/90 px-10 py-6 shadow-glow w-full sm:w-auto"
+                      className="relative overflow-hidden group bg-white text-animation-purple hover:bg-white/90 px-10 py-6 shadow-glow"
                     >
                       <span className="relative z-10 text-lg font-medium">Start Creating Now</span>
                       <span className="absolute inset-0 bg-animation-purple/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
