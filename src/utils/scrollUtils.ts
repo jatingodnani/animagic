@@ -57,3 +57,55 @@ export const scrollToSectionWithCallback = (
     }
   }
 };
+
+/**
+ * Sets up intersection observers for animating elements when they come into view
+ */
+export const setupScrollAnimations = (): void => {
+  const animatedElements = document.querySelectorAll('.animate-on-scroll');
+  
+  if (!animatedElements.length) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const element = entry.target as HTMLElement;
+        const delay = element.dataset.delay || '0';
+        
+        setTimeout(() => {
+          element.classList.add('animate-active');
+        }, parseInt(delay));
+        
+        // Unobserve after animation is triggered
+        observer.unobserve(element);
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  animatedElements.forEach(element => {
+    observer.observe(element);
+  });
+};
+
+/**
+ * Creates a parallax scrolling effect for an element
+ */
+export const setupParallaxEffect = (): void => {
+  const parallaxElements = document.querySelectorAll('.parallax-element');
+  
+  if (!parallaxElements.length) return;
+  
+  const handleScroll = () => {
+    const scrollY = window.scrollY;
+    
+    parallaxElements.forEach((element) => {
+      const speed = parseFloat((element as HTMLElement).dataset.speed || '0.2');
+      const offset = scrollY * speed;
+      
+      (element as HTMLElement).style.transform = `translateY(${offset}px)`;
+    });
+  };
+  
+  window.addEventListener('scroll', handleScroll);
+};
+

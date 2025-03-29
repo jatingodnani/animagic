@@ -132,6 +132,58 @@
     @apply border border-gray-200 rounded-md overflow-hidden hover:border-animation-purple/50 transition-all duration-200;
   }
   
+  /* Background particles */
+  .bg-particle {
+    @apply absolute rounded-full bg-animation-purple opacity-5 pointer-events-none;
+    animation: float-random 20s infinite linear;
+  }
+  
+  /* Animate on scroll elements */
+  .animate-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  }
+  
+  .animate-on-scroll.animate-active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Text gradient animation */
+  .animate-text-gradient {
+    background: linear-gradient(
+      to right, 
+      #fff, 
+      #e5deff, 
+      #fff
+    );
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: text-gradient 3s linear infinite;
+  }
+  
+  /* Pulse border animation */
+  .animate-pulse-border {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+    animation: pulse-border 2s infinite;
+  }
+  
+  /* Path drawing animation */
+  .animate-draw-path {
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    animation: draw-path 3s ease-in-out forwards infinite;
+  }
+  
+  .animate-draw-path-reverse {
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    animation: draw-path-reverse 3s ease-in-out forwards infinite;
+  }
+  
   /* New animations */
   @keyframes float {
     0% {
@@ -142,6 +194,72 @@
     }
     100% {
       transform: translateY(0px) rotate(-12deg);
+    }
+  }
+  
+  @keyframes float-random {
+    0% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+      transform: translate(10px, 10px) rotate(90deg);
+    }
+    50% {
+      transform: translate(0, 15px) rotate(180deg);
+    }
+    75% {
+      transform: translate(-10px, 10px) rotate(270deg);
+    }
+    100% {
+      transform: translate(0, 0) rotate(360deg);
+    }
+  }
+  
+  @keyframes text-gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  @keyframes pulse-border {
+    0% {
+      box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+    }
+  }
+  
+  @keyframes draw-path {
+    0% {
+      stroke-dashoffset: 300;
+    }
+    50% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: -300;
+    }
+  }
+  
+  @keyframes draw-path-reverse {
+    0% {
+      stroke-dashoffset: -300;
+    }
+    50% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: 300;
     }
   }
   
@@ -186,3 +304,4 @@
   .stagger-4 { animation-delay: 400ms; }
   .stagger-5 { animation-delay: 500ms; }
 }
+
