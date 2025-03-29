@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -11,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Download, Film, Settings, Info, AlertTriangle } from 'lucide-react';
@@ -58,7 +57,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
     duration: "5",
     resolution: { width: 1280, height: 720 },
     customWidth: 1280,
-    customHeight: 720,
+    customHeight: 1280,
     useCustomResolution: false,
     includeWatermark: false,
     compressionLevel: 50
@@ -66,29 +65,24 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
   
   const { toast } = useToast();
   
-  // Check platform and codec support
   useEffect(() => {
-    // Check if user is on macOS
     const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
     setIsMacOS(isMac);
     
-    // Check for VideoEncoder support
     const hasVideoEncoderSupport = typeof window !== 'undefined' && 'VideoEncoder' in window;
     setHasWebCodecSupport(hasVideoEncoderSupport);
     
-    // Adjust default format for Mac users
     if (isMac && !hasVideoEncoderSupport) {
       setSettings(prev => ({
         ...prev,
-        format: "gif" // Default to GIF for Mac users without VideoEncoder
+        format: "gif"
       }));
     }
   }, []);
   
-  // Calculate total frames based on duration and frame rate
   const getTotalFramesForAnimation = () => {
     const duration = parseFloat(settings.duration);
-    if (isNaN(duration) || duration <= 0) return frameRate * 5; // Default to 5 seconds
+    if (isNaN(duration) || duration <= 0) return frameRate * 5;
     return Math.round(duration * settings.frameRate);
   };
   
@@ -132,14 +126,12 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
     }));
   };
   
-  // Get available formats based on browser support
   const getAvailableFormats = () => {
     if (!hasWebCodecSupport) {
-      return ["gif"]; // Fallback to GIF if WebCodec not supported
+      return ["gif"];
     }
     
     if (isMacOS) {
-      // Mac has better support for these formats
       return ["mp4", "webm", "gif"];
     }
     
@@ -160,7 +152,6 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       setIsExporting(true);
       setExportProgress(0);
       
-      // Calculate total frames for the animation based on duration and frame rate
       const durationInSeconds = parseFloat(settings.duration);
       if (isNaN(durationInSeconds) || durationInSeconds <= 0) {
         toast({
@@ -179,7 +170,6 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       console.log(`Quality settings: ${qualitySettings.width}x${qualitySettings.height} at ${qualitySettings.bitrate} bps`);
       console.log(`Platform: ${isMacOS ? 'macOS' : 'Other'}, Format: ${settings.format}`);
       
-      // Check compatibility issues
       if (isMacOS && settings.format !== "gif" && !hasWebCodecSupport) {
         toast({
           title: "Compatibility Warning",
@@ -188,10 +178,8 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
         });
       }
       
-      // Simulate video export process
       let progress = 0;
-      // Add more steps to account for the animation processing
-      const totalSteps = totalFramesForAnimation + 20; // Additional steps for encoding
+      const totalSteps = totalFramesForAnimation + 20;
       
       const interval = setInterval(() => {
         progress += 1;
@@ -201,7 +189,6 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
         if (progress >= totalSteps) {
           clearInterval(interval);
           
-          // Simulated completion
           setTimeout(() => {
             setExportProgress(100);
             setIsExporting(false);
@@ -211,15 +198,13 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
               description: `Your ${durationInSeconds}-second animated video has been exported as ${settings.format.toUpperCase()} with ${totalFramesForAnimation} frames.`,
             });
             
-            // Simulate download with appropriate extension
             const a = document.createElement("a");
             a.href = "#";
             a.download = `animated-video-${durationInSeconds}s.${settings.format}`;
             a.click();
           }, 1000);
         }
-      }, 50); // Faster simulation for better UX
-      
+      }, 50);
     } catch (error) {
       console.error("Error exporting video:", error);
       setIsExporting(false);
@@ -231,13 +216,10 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
     }
   };
   
-  // Update duration when frame rate changes to maintain consistency
   useEffect(() => {
-    // Just to ensure we have the latest calculations if frameRate changes
     getTotalFramesForAnimation();
   }, [settings.frameRate, settings.duration]);
   
-  // Update custom resolution when quality changes
   useEffect(() => {
     if (!settings.useCustomResolution) {
       const qualitySettings = getQualitySettings();
@@ -274,7 +256,7 @@ const VideoExporter: React.FC<VideoExporterProps> = ({ frames, frameRate = 24 })
       </div>
       
       {isMacOS && !hasWebCodecSupport && (
-        <Alert variant="warning" className="mb-4">
+        <Alert className="mb-4">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Mac Compatibility Notice</AlertTitle>
           <AlertDescription>
