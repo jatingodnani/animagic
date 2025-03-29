@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -10,9 +9,10 @@ import VideoExporter from '@/components/VideoExporter';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Presentation } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { previewAnimation } from '@/utils/frameAnimationUtils';
+import { Button } from "@/components/ui/button";
 
 const Editor = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -132,11 +132,20 @@ const Editor = () => {
       
       <main className="flex-grow py-8 px-4">
         <div className="container max-w-7xl mx-auto">
-          <div className="flex items-center gap-2 mb-6">
-            <Link to="/" className="text-animation-gray-500 hover:text-animation-purple transition-colors">
-              <ArrowLeft className="h-4 w-4" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Link to="/" className="text-animation-gray-500 hover:text-animation-purple transition-colors">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+              <h1 className="text-2xl font-semibold">Video Animation Editor</h1>
+            </div>
+            
+            <Link to="/presentation">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Presentation className="h-4 w-4" />
+                Presentation Mode
+              </Button>
             </Link>
-            <h1 className="text-2xl font-semibold">Video Animation Editor</h1>
           </div>
           
           {!videoFile ? (

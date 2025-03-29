@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Film, Settings, Upload, Play } from 'lucide-react';
+import { Film, Settings, Upload, Play, Presentation } from 'lucide-react';
 
 const Navbar = () => {
   return (
@@ -20,6 +20,9 @@ const Navbar = () => {
             </Link>
             <Link to="/editor" className="text-sm font-medium hover:text-animation-purple transition-colors">
               Editor
+            </Link>
+            <Link to="/presentation" className="text-sm font-medium hover:text-animation-purple transition-colors">
+              Presentation
             </Link>
             <Link to="#features" className="text-sm font-medium hover:text-animation-purple transition-colors">
               Features

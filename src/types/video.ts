@@ -19,3 +19,11 @@ export interface VideoExporterProps {
   frames: string[];
   frameRate?: number;
 }
+
+export interface PerformanceMetrics {
+  frameExtractionTime: number;
+  processingTime: number;
+  exportTime: number;
+  memoryUsage: number;
+  compressionRatio: number;
+}
