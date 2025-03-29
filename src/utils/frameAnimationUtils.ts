@@ -1,4 +1,3 @@
-
 /**
  * Utilities for frame extraction, animation, and encoding using the Web Codecs API
  */
@@ -330,6 +329,7 @@ export function previewAnimation(
     const elapsedSeconds = elapsedTime / 1000;
     
     // Calculate progress (0 to 1) based on actual elapsed time
+    // This ensures the animation takes exactly durationInSeconds to complete
     let progress = Math.min(elapsedSeconds / durationInSeconds, 1);
     
     // Loop the animation when it completes
