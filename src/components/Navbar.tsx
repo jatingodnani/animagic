@@ -1,10 +1,18 @@
-
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Film, Settings, Upload, Play, Presentation } from 'lucide-react';
 
 const Navbar = () => {
+  const location = useLocation();
+  
+  const createHashLink = (hash: string) => {
+    if (location.pathname === '/') {
+      return `#${hash}`;
+    }
+    return `/#${hash}`;
+  };
+  
   return (
     <header className="w-full py-4 px-4 md:px-8 border-b bg-white">
       <div className="container max-w-7xl mx-auto">
@@ -24,10 +32,10 @@ const Navbar = () => {
             <Link to="/presentation" className="text-sm font-medium hover:text-animation-purple transition-colors">
               Presentation
             </Link>
-            <Link to="#features" className="text-sm font-medium hover:text-animation-purple transition-colors">
+            <Link to={createHashLink('features')} className="text-sm font-medium hover:text-animation-purple transition-colors">
               Features
             </Link>
-            <Link to="#tutorial" className="text-sm font-medium hover:text-animation-purple transition-colors">
+            <Link to={createHashLink('tutorial')} className="text-sm font-medium hover:text-animation-purple transition-colors">
               How It Works
             </Link>
           </nav>
