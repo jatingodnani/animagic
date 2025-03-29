@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 interface AnimatedFeatureCardProps {
   title: string;
@@ -80,16 +81,18 @@ const AnimatedFeatureCard: React.FC<AnimatedFeatureCardProps> = ({
           <Button
             variant="ghost"
             className={`group-hover:text-${color} group-hover:bg-${color}/10 transition-colors duration-300`}
-            href={buttonHref}
+            asChild
           >
-            {buttonText}
-            <motion.span 
-              className="ml-2"
-              animate={isHovered ? { x: 5 } : { x: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              →
-            </motion.span>
+            <Link to={buttonHref}>
+              {buttonText}
+              <motion.span 
+                className="ml-2"
+                animate={isHovered ? { x: 5 } : { x: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                →
+              </motion.span>
+            </Link>
           </Button>
         )}
       </div>
