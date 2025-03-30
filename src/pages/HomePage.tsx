@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -43,6 +42,9 @@ const HomePage = () => {
     { id: 'rotate', name: 'Rotation Effect', icon: <RotateCw className="h-5 w-5" /> },
     { id: 'move', name: 'Movement Effect', icon: <MoveHorizontal className="h-5 w-5" /> },
   ];
+
+  // Animation demo image URL
+  const demoImageUrl = "https://images.unsplash.com/photo-1579547945413-497e1b99dac0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
 
   return (
     <div className="relative min-h-screen">
@@ -119,7 +121,7 @@ const HomePage = () => {
                   ${activeEffect === 'move' ? 'animate-pulse animate-move-horizontal' : ''}
                 `}>
                   <img 
-                    src="https://images.unsplash.com/photo-1569017388730-020b5dd05082?auto=format&fit=crop&q=80&w=800"
+                    src={demoImageUrl}
                     alt="Animation Demo" 
                     className="w-full h-full object-cover"
                   />
